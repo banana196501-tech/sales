@@ -130,5 +130,5 @@ create trigger update_broadcast_templates_updated_at before update on public.bro
 
 -- Seed data: Admin User
 insert into public.users (email, name, role) 
-values ('admin@test.com', 'Admin User', 'admin') 
+values ('banana196501@gmail.com', 'Admin User', 'admin') 
 on conflict (email) do nothing;
