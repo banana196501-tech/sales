@@ -23,7 +23,7 @@ create table if not exists public.leads (
   email text not null,
   product_interest text,
   deal_value numeric default 0,
-  status text not null,
+  status text not null check (status in ('new_lead', 'contacted', 'presentation', 'negotiation', 'closed_won', 'closed_lost')),
   tags text[] default '{}',
   assigned_to uuid references public.users(id) on delete set null,
   source text,
