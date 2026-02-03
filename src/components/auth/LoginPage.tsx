@@ -44,7 +44,7 @@ const LoginPage: React.FC = () => {
           <div className="inline-flex items-center justify-center w-48 h-24 mb-4 overflow-hidden">
             <img src={logo} alt="Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white">{t('app_name')}</h1>
+          <h1 className="text-2xl font-bold text-white">{t('app_name')}</h1>
           <p className="text-slate-400 mt-2">{t('platform_desc')}</p>
         </div>
 

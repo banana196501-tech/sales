@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
                 <div className="w-12 h-10 flex items-center justify-center overflow-hidden">
                   <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <span className="font-semibold text-base whitespace-nowrap truncate">{t('app_name')}</span>
+                <span className="font-semibold text-sm whitespace-nowrap truncate">{t('app_name')}</span>
               </div>
             )}
             <button
