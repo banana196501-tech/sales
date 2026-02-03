@@ -205,6 +205,9 @@ const resources = {
             enter_credentials: 'Please enter both email and password',
             demo_accounts: 'Demo accounts (password: any 4+ chars)',
             internal_use: 'Internal use only. Unauthorized access prohibited.',
+            app_name: 'Nusantara Sakti Sales',
+            app_desc: 'Honda Vehicle Sales Management',
+            platform_desc: 'Official Sales & CRM Platform for Nusantara Sakti Group',
         },
     },
     id: {
@@ -409,6 +412,9 @@ const resources = {
             enter_credentials: 'Harap masukkan email dan kata sandi',
             demo_accounts: 'Akun demo (kata sandi: min 4 karakter)',
             internal_use: 'Hanya untuk penggunaan internal. Akses tidak sah dilarang.',
+            app_name: 'Sales Nusantara Sakti',
+            app_desc: 'Manajemen Penjualan Kendaraan Honda',
+            platform_desc: 'Platform Penjualan & CRM Resmi Nusantara Sakti Group',
         },
     },
 };

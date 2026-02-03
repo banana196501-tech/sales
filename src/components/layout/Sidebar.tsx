@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   Bell
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 interface SidebarProps {
   currentPage: string;
@@ -66,10 +67,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
           <div className="flex items-center justify-between p-4 border-b border-slate-700">
             {isOpen && (
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">S</span>
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center overflow-hidden p-1">
+                  <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <span className="font-semibold text-lg">SalesHub</span>
+                <span className="font-semibold text-lg">{t('app_name')}</span>
               </div>
             )}
             <button
