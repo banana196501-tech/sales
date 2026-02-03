@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,29 +14,29 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setError(t('enter_credentials'));
       return;
     }
-    
+
     const success = await login(email, password);
     if (!success) {
-      setError('Invalid credentials. Try: admin@company.com / password');
+      setError(t('login_error'));
     }
   };
 
   const demoAccounts = [
-    { email: 'admin@company.com', role: 'Admin', description: 'Full access to all features' },
-    { email: 'manager@company.com', role: 'Manager', description: 'Team management & analytics' },
-    { email: 'sales1@company.com', role: 'Sales', description: 'Lead & pipeline management' },
+    { email: 'admin@company.com', role: 'Admin', description: t('full_access_desc', { defaultValue: 'Full access to all features' }) },
+    { email: 'manager@company.com', role: 'Manager', description: t('manager_access_desc', { defaultValue: 'Team management & analytics' }) },
+    { email: 'sales1@company.com', role: 'Sales', description: t('sales_access_desc', { defaultValue: 'Lead & pipeline management' }) },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 flex items-center justify-center p-4">
       {/* Background pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
-      
+
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -42,18 +44,18 @@ const LoginPage: React.FC = () => {
             <span className="text-white font-bold text-2xl">S</span>
           </div>
           <h1 className="text-3xl font-bold text-white">SalesHub</h1>
-          <p className="text-slate-400 mt-2">Sales Enablement & Automation Platform</p>
+          <p className="text-slate-400 mt-2">{t('platform_desc', { defaultValue: 'Sales Enablement & Automation Platform' })}</p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10">
-          <h2 className="text-xl font-semibold text-white mb-6">Sign in to your account</h2>
-          
+          <h2 className="text-xl font-semibold text-white mb-6">{t('sign_in')}</h2>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Email address
+                {t('email_address')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -61,7 +63,7 @@ const LoginPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder={t('enter_email')}
                   className="w-full bg-white/10 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -70,7 +72,7 @@ const LoginPage: React.FC = () => {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Password
+                {t('password_label')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -78,7 +80,7 @@ const LoginPage: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder={t('enter_password')}
                   className="w-full bg-white/10 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
                 <button
@@ -107,17 +109,17 @@ const LoginPage: React.FC = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Signing in...
+                  {t('signing_in')}
                 </>
               ) : (
-                'Sign in'
+                t('sign_in_btn')
               )}
             </button>
           </form>
 
           {/* Demo accounts */}
           <div className="mt-8 pt-6 border-t border-white/10">
-            <p className="text-sm text-slate-400 mb-4">Demo accounts (password: any 4+ chars)</p>
+            <p className="text-sm text-slate-400 mb-4">{t('demo_accounts')}</p>
             <div className="space-y-2">
               {demoAccounts.map((account) => (
                 <button
@@ -143,7 +145,7 @@ const LoginPage: React.FC = () => {
 
         {/* Footer */}
         <p className="text-center text-slate-500 text-sm mt-6">
-          Internal use only. Unauthorized access prohibited.
+          {t('internal_use')}
         </p>
       </div>
     </div>

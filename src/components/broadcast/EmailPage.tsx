@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { BroadcastTemplate, BroadcastCampaign } from '@/types/sales';
-import { 
-  Mail, 
-  Plus, 
-  Send, 
-  Clock, 
-  CheckCircle, 
+import {
+  Mail,
+  Plus,
+  Send,
+  Clock,
+  CheckCircle,
   AlertCircle,
   Users,
   FileText,
@@ -17,8 +17,10 @@ import {
   MousePointer,
   BarChart3
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const EmailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { templates, campaigns, leads, addCampaign, sendCampaign } = useSales();
   const [activeTab, setActiveTab] = useState<'campaigns' | 'templates'>('campaigns');
   const [showNewCampaign, setShowNewCampaign] = useState(false);
@@ -84,7 +86,7 @@ const EmailPage: React.FC = () => {
     setScheduleDate('');
   };
 
-  const filteredLeads = leads.filter(lead => 
+  const filteredLeads = leads.filter(lead =>
     lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lead.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lead.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -95,15 +97,15 @@ const EmailPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Email Broadcast</h2>
-          <p className="text-slate-500">Create and manage email campaigns</p>
+          <h2 className="text-2xl font-bold text-slate-900">{t('email')}</h2>
+          <p className="text-slate-500">{t('broadcast_email_desc')}</p>
         </div>
         <button
           onClick={() => setShowNewCampaign(true)}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all shadow-lg shadow-blue-500/30"
         >
           <Plus className="w-4 h-4" />
-          New Campaign
+          {t('new_campaign')}
         </button>
       </div>
 
@@ -116,7 +118,7 @@ const EmailPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{emailCampaigns.length}</p>
-              <p className="text-sm text-slate-500">Total Campaigns</p>
+              <p className="text-sm text-slate-500">{t('total_campaigns')}</p>
             </div>
           </div>
         </div>
@@ -127,7 +129,7 @@ const EmailPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{totalSent}</p>
-              <p className="text-sm text-slate-500">Emails Sent</p>
+              <p className="text-sm text-slate-500">{t('messages_sent')}</p>
             </div>
           </div>
         </div>
@@ -138,7 +140,7 @@ const EmailPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{openRate}%</p>
-              <p className="text-sm text-slate-500">Open Rate</p>
+              <p className="text-sm text-slate-500">{t('opened')}</p>
             </div>
           </div>
         </div>
@@ -151,7 +153,7 @@ const EmailPage: React.FC = () => {
               <p className="text-2xl font-bold text-slate-900">
                 {emailCampaigns.reduce((sum, c) => sum + c.stats.replied, 0)}
               </p>
-              <p className="text-sm text-slate-500">Replies</p>
+              <p className="text-sm text-slate-500">{t('replied')}</p>
             </div>
           </div>
         </div>
@@ -161,23 +163,21 @@ const EmailPage: React.FC = () => {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setActiveTab('campaigns')}
-          className={`px-4 py-2 rounded-xl font-medium transition-colors ${
-            activeTab === 'campaigns'
+          className={`px-4 py-2 rounded-xl font-medium transition-colors ${activeTab === 'campaigns'
               ? 'bg-blue-600 text-white'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
+            }`}
         >
-          Campaigns
+          {t('campaigns_tab')}
         </button>
         <button
           onClick={() => setActiveTab('templates')}
-          className={`px-4 py-2 rounded-xl font-medium transition-colors ${
-            activeTab === 'templates'
+          className={`px-4 py-2 rounded-xl font-medium transition-colors ${activeTab === 'templates'
               ? 'bg-blue-600 text-white'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
+            }`}
         >
-          Templates
+          {t('templates_tab')}
         </button>
       </div>
 
@@ -188,21 +188,21 @@ const EmailPage: React.FC = () => {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Campaign</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden md:table-cell">Recipients</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden lg:table-cell">Performance</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Date</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Actions</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('campaign_label')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('status')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden md:table-cell">{t('recipients')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden lg:table-cell">{t('performance')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('date_label')}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {emailCampaigns.map((campaign) => {
                   const template = templates.find(t => t.id === campaign.templateId);
-                  const openRate = campaign.stats.delivered > 0 
-                    ? Math.round((campaign.stats.read / campaign.stats.delivered) * 100) 
+                  const openRate = campaign.stats.delivered > 0
+                    ? Math.round((campaign.stats.read / campaign.stats.delivered) * 100)
                     : 0;
-                  
+
                   return (
                     <tr key={campaign.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
@@ -232,11 +232,11 @@ const EmailPage: React.FC = () => {
                         <div className="flex items-center gap-4">
                           <div className="flex-1 max-w-32">
                             <div className="flex items-center justify-between text-xs mb-1">
-                              <span className="text-slate-500">Open Rate</span>
+                              <span className="text-slate-500">{t('opened')}</span>
                               <span className="font-medium text-slate-700">{openRate}%</span>
                             </div>
                             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                              <div 
+                              <div
                                 className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                                 style={{ width: `${openRate}%` }}
                               />
@@ -246,9 +246,9 @@ const EmailPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm text-slate-600">
-                          {campaign.sentAt 
+                          {campaign.sentAt
                             ? new Date(campaign.sentAt).toLocaleDateString()
-                            : campaign.scheduledAt 
+                            : campaign.scheduledAt
                               ? `Scheduled: ${new Date(campaign.scheduledAt).toLocaleDateString()}`
                               : 'Not scheduled'}
                         </p>
@@ -284,14 +284,14 @@ const EmailPage: React.FC = () => {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-1">No campaigns yet</h3>
-              <p className="text-slate-500 mb-4">Create your first email campaign</p>
+              <h3 className="text-lg font-medium text-slate-900 mb-1">{t('no_campaigns')}</h3>
+              <p className="text-slate-500 mb-4">{t('create_email_campaign_desc')}</p>
               <button
                 onClick={() => setShowNewCampaign(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Create Campaign
+                {t('create_campaign_btn')}
               </button>
             </div>
           )}
@@ -317,7 +317,7 @@ const EmailPage: React.FC = () => {
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
               {template.subject && (
-                <p className="text-sm text-slate-500 mb-2">Subject: {template.subject}</p>
+                <p className="text-sm text-slate-500 mb-2">{t('subject_label')}: {template.subject}</p>
               )}
               <p className="text-sm text-slate-600 line-clamp-3 mb-3">{template.content}</p>
               <div className="flex flex-wrap gap-1">
@@ -335,7 +335,7 @@ const EmailPage: React.FC = () => {
             <div className="p-3 bg-blue-100 rounded-xl mb-3">
               <Plus className="w-6 h-6 text-blue-600" />
             </div>
-            <p className="font-medium text-slate-700">Add Template</p>
+            <p className="font-medium text-slate-700">{t('add_template')}</p>
           </button>
         </div>
       )}
@@ -346,13 +346,13 @@ const EmailPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowNewCampaign(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="text-xl font-semibold text-slate-900">Create Email Campaign</h2>
+              <h2 className="text-xl font-semibold text-slate-900">{t('create_email_campaign')}</h2>
             </div>
 
             <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
               {/* Campaign Name */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Campaign Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('campaign_name')}</label>
                 <input
                   type="text"
                   value={campaignName}
@@ -364,21 +364,20 @@ const EmailPage: React.FC = () => {
 
               {/* Template Selection */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Email Template</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('message_template')}</label>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {emailTemplates.map((template) => (
                     <button
                       key={template.id}
                       onClick={() => setSelectedTemplate(template.id)}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                        selectedTemplate === template.id
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedTemplate === template.id
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-slate-200 hover:border-slate-300'
-                      }`}
+                        }`}
                     >
                       <p className="font-medium text-slate-900">{template.name}</p>
                       {template.subject && (
-                        <p className="text-sm text-slate-500">Subject: {template.subject}</p>
+                        <p className="text-sm text-slate-500">{t('subject_label')}: {template.subject}</p>
                       )}
                     </button>
                   ))}
@@ -388,7 +387,7 @@ const EmailPage: React.FC = () => {
               {/* Recipients */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Select Recipients ({selectedLeads.length} selected)
+                  {t('select_recipients')} ({selectedLeads.length} {t('selected_count')})
                 </label>
                 <div className="relative mb-3">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -430,21 +429,21 @@ const EmailPage: React.FC = () => {
                     onClick={() => setSelectedLeads(filteredLeads.map(l => l.id))}
                     className="text-sm text-blue-600 hover:text-blue-700"
                   >
-                    Select All
+                    {t('select_all')}
                   </button>
                   <span className="text-slate-300">|</span>
                   <button
                     onClick={() => setSelectedLeads([])}
                     className="text-sm text-slate-600 hover:text-slate-700"
                   >
-                    Clear
+                    {t('clear')}
                   </button>
                 </div>
               </div>
 
               {/* Schedule */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Schedule (Optional)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('schedule_optional')}</label>
                 <input
                   type="datetime-local"
                   value={scheduleDate}
@@ -459,14 +458,14 @@ const EmailPage: React.FC = () => {
                 onClick={() => setShowNewCampaign(false)}
                 className="px-6 py-2.5 text-slate-700 hover:bg-slate-200 rounded-xl transition-colors font-medium"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleCreateCampaign}
                 disabled={!campaignName || !selectedTemplate || selectedLeads.length === 0}
                 className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-300 disabled:to-slate-400 text-white rounded-xl transition-all font-medium shadow-lg shadow-blue-500/30 disabled:shadow-none"
               >
-                Create Campaign
+                {t('create_campaign_btn')}
               </button>
             </div>
           </div>

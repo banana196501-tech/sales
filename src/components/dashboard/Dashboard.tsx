@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Users, 
-  TrendingUp, 
-  DollarSign, 
+import {
+  Users,
+  TrendingUp,
+  DollarSign,
   Target,
   ArrowUpRight,
   ArrowDownRight,
@@ -12,9 +12,11 @@ import {
   Loader2
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { PIPELINE_STAGES } from '@/types/sales';
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { leads, tasks, leadsLoading } = useSales();
   const { users } = useAuth();
 
@@ -64,34 +66,34 @@ const Dashboard: React.FC = () => {
   const overdueTasks = tasks.filter(t => t.status === 'pending' && new Date(t.dueDate) < new Date()).length;
 
   const kpiCards = [
-    { 
-      title: 'Total Leads', 
-      value: stats.totalLeads, 
-      change: '+12%', 
+    {
+      title: t('total_leads'),
+      value: stats.totalLeads,
+      change: '+12%',
       positive: true,
       icon: Users,
       color: 'from-blue-500 to-cyan-500',
     },
-    { 
-      title: 'Active Deals', 
-      value: stats.activeDeals, 
-      change: '+8%', 
+    {
+      title: t('active_deals'),
+      value: stats.activeDeals,
+      change: '+8%',
       positive: true,
       icon: Target,
       color: 'from-purple-500 to-pink-500',
     },
-    { 
-      title: 'Closing Rate', 
-      value: `${stats.closingRate}%`, 
-      change: '+3.2%', 
+    {
+      title: t('closing_rate'),
+      value: `${stats.closingRate}%`,
+      change: '+3.2%',
       positive: true,
       icon: TrendingUp,
       color: 'from-emerald-500 to-teal-500',
     },
-    { 
-      title: 'Revenue', 
-      value: `$${(stats.revenue / 1000).toFixed(0)}K`, 
-      change: '+18%', 
+    {
+      title: t('revenue'),
+      value: `$${(stats.revenue / 1000).toFixed(0)}K`,
+      change: '+18%',
       positive: true,
       icon: DollarSign,
       color: 'from-amber-500 to-orange-500',
@@ -118,7 +120,7 @@ const Dashboard: React.FC = () => {
         {kpiCards.map((card, index) => {
           const Icon = card.icon;
           return (
-            <div 
+            <div
               key={index}
               className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
             >
@@ -129,7 +131,7 @@ const Dashboard: React.FC = () => {
                   <div className={`flex items-center gap-1 mt-2 text-sm ${card.positive ? 'text-emerald-600' : 'text-red-600'}`}>
                     {card.positive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                     <span className="font-medium">{card.change}</span>
-                    <span className="text-slate-400">vs last month</span>
+                    <span className="text-slate-400">{t('vs_last_month')}</span>
                   </div>
                 </div>
                 <div className={`p-3 rounded-xl bg-gradient-to-br ${card.color}`}>
@@ -147,8 +149,8 @@ const Dashboard: React.FC = () => {
         <div className="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Pipeline Value by Stage</h3>
-              <p className="text-sm text-slate-500">Deal value distribution</p>
+              <h3 className="text-lg font-semibold text-slate-900">{t('revenue_chart')}</h3>
+              <p className="text-sm text-slate-500">{t('distribution')}</p>
             </div>
           </div>
           <div className="h-72">
@@ -156,8 +158,8 @@ const Dashboard: React.FC = () => {
               <BarChart data={pipelineData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
-                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `$${v/1000}K`} />
-                <Tooltip 
+                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `$${v / 1000}K`} />
+                <Tooltip
                   formatter={(value: number) => [`$${value.toLocaleString()}`, 'Value']}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
@@ -176,8 +178,8 @@ const Dashboard: React.FC = () => {
         {/* Pipeline Distribution */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Lead Distribution</h3>
-            <p className="text-sm text-slate-500">Leads by stage</p>
+            <h3 className="text-lg font-semibold text-slate-900">{t('distribution')}</h3>
+            <p className="text-sm text-slate-500">{t('leads')} {t('status')}</p>
           </div>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
@@ -196,7 +198,7 @@ const Dashboard: React.FC = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   formatter={(value: number, name: string) => [value, name]}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
@@ -221,7 +223,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Sales Performance</h3>
+              <h3 className="text-lg font-semibold text-slate-900">{t('sales_performance')}</h3>
               <p className="text-sm text-slate-500">Team leaderboard</p>
             </div>
             <BarChart3 className="w-5 h-5 text-slate-400" />
@@ -232,9 +234,9 @@ const Dashboard: React.FC = () => {
                 <div key={person.userId} className="flex items-center gap-4">
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                    ${index === 0 ? 'bg-amber-100 text-amber-700' : 
-                      index === 1 ? 'bg-slate-100 text-slate-700' : 
-                      index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-50 text-slate-500'}
+                    ${index === 0 ? 'bg-amber-100 text-amber-700' :
+                      index === 1 ? 'bg-slate-100 text-slate-700' :
+                        index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-50 text-slate-500'}
                   `}>
                     {index + 1}
                   </div>
@@ -248,7 +250,7 @@ const Dashboard: React.FC = () => {
                     )}
                     <div className="min-w-0">
                       <p className="font-medium text-slate-900 truncate">{person.userName}</p>
-                      <p className="text-sm text-slate-500">{person.dealsClosed} deals closed</p>
+                      <p className="text-sm text-slate-500">{person.dealsClosed} {t('deals_closed')}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -258,7 +260,7 @@ const Dashboard: React.FC = () => {
                 </div>
               ))
             ) : (
-              <p className="text-slate-500 text-center py-4">No sales data available</p>
+              <p className="text-slate-500 text-center py-4">{t('no_sales_data')}</p>
             )}
           </div>
         </div>
@@ -267,11 +269,11 @@ const Dashboard: React.FC = () => {
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Tasks Overview</h3>
+              <h3 className="text-lg font-semibold text-slate-900">{t('tasks_overview')}</h3>
               <p className="text-sm text-slate-500">Your pending tasks</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-amber-50 rounded-xl p-4">
               <p className="text-2xl font-bold text-amber-700">{pendingTasks}</p>
@@ -279,19 +281,19 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="bg-red-50 rounded-xl p-4">
               <p className="text-2xl font-bold text-red-700">{overdueTasks}</p>
-              <p className="text-sm text-red-600">Overdue</p>
+              <p className="text-sm text-red-600">{t('overdue')}</p>
             </div>
           </div>
 
           <div className="space-y-3">
             {tasks.filter(t => t.status !== 'completed').slice(0, 4).map((task) => (
-              <div 
+              <div
                 key={task.id}
                 className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <div className={`
                   w-2 h-2 rounded-full
-                  ${task.priority === 'high' ? 'bg-red-500' : 
+                  ${task.priority === 'high' ? 'bg-red-500' :
                     task.priority === 'medium' ? 'bg-amber-500' : 'bg-slate-400'}
                 `} />
                 <div className="flex-1 min-w-0">
@@ -317,7 +319,7 @@ const Dashboard: React.FC = () => {
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Recent Leads</h3>
+            <h3 className="text-lg font-semibold text-slate-900">{t('recent_leads')}</h3>
             <p className="text-sm text-slate-500">Latest additions to your pipeline</p>
           </div>
         </div>
@@ -325,11 +327,11 @@ const Dashboard: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="text-left text-sm text-slate-500 border-b border-slate-100">
-                <th className="pb-3 font-medium">Name</th>
-                <th className="pb-3 font-medium">Company</th>
-                <th className="pb-3 font-medium hidden md:table-cell">Product</th>
-                <th className="pb-3 font-medium">Value</th>
-                <th className="pb-3 font-medium">Status</th>
+                <th className="pb-3 font-medium">{t('name')}</th>
+                <th className="pb-3 font-medium">{t('company')}</th>
+                <th className="pb-3 font-medium hidden md:table-cell">{t('product')}</th>
+                <th className="pb-3 font-medium">{t('value')}</th>
+                <th className="pb-3 font-medium">{t('status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -355,7 +357,7 @@ const Dashboard: React.FC = () => {
               {leads.length === 0 && (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-500">
-                    No leads yet. Add your first lead to get started!
+                    {t('no_leads')}
                   </td>
                 </tr>
               )}

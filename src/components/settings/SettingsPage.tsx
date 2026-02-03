@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/database';
 import { User, UserRole } from '@/types/sales';
-import { 
-  Settings, 
-  Users, 
-  Mail, 
-  MessageSquare, 
-  Shield, 
+import {
+  Settings,
+  Users,
+  Mail,
+  MessageSquare,
+  Shield,
   Bell,
   Plus,
   Edit,
@@ -20,8 +20,10 @@ import {
   Loader2
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const SettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user, users, hasRole, refreshUsers } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
   const [showAddUser, setShowAddUser] = useState(false);
@@ -39,15 +41,15 @@ const SettingsPage: React.FC = () => {
   });
 
   const tabs = [
-    { id: 'users', label: 'User Management', icon: Users },
-    { id: 'integrations', label: 'Integrations', icon: Globe },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'security', label: 'Security', icon: Shield },
+    { id: 'users', label: t('user_mgmt'), icon: Users },
+    { id: 'integrations', label: t('integrations'), icon: Globe },
+    { id: 'notifications', label: t('notifications'), icon: Bell },
+    { id: 'security', label: t('security'), icon: Shield },
   ];
 
   const handleAddUser = async () => {
     if (!newUser.name || !newUser.email) return;
-    
+
     setIsSubmitting(true);
     try {
       await db.users.create({
@@ -55,11 +57,11 @@ const SettingsPage: React.FC = () => {
         email: newUser.email,
         role: newUser.role,
       });
-      
+
       await refreshUsers();
       setShowAddUser(false);
       setNewUser({ name: '', email: '', role: 'sales' });
-      toast({ title: 'User created', description: `${newUser.name} has been added` });
+      toast({ title: t('user_created'), description: t('user_added_desc', { name: newUser.name }) });
     } catch (error) {
       console.error('Failed to create user:', error);
       toast({ title: 'Error', description: 'Failed to create user', variant: 'destructive' });
@@ -69,8 +71,8 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleDeleteUser = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    
+    if (!confirm(t('delete_user_confirm'))) return;
+
     try {
       await db.users.delete(id);
       await refreshUsers();
@@ -94,8 +96,8 @@ const SettingsPage: React.FC = () => {
     <div className="p-4 lg:p-6">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">Settings</h2>
-        <p className="text-slate-500">Manage your application settings and integrations</p>
+        <h2 className="text-2xl font-bold text-slate-900">{t('settings')}</h2>
+        <p className="text-slate-500">{t('settings_desc')}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -110,8 +112,8 @@ const SettingsPage: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left
-                    ${activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30' 
+                    ${activeTab === tab.id
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                       : 'text-slate-600 hover:bg-slate-50'
                     }
                   `}
@@ -131,15 +133,15 @@ const SettingsPage: React.FC = () => {
             <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">User Management</h3>
-                  <p className="text-sm text-slate-500">Manage team members and their roles</p>
+                  <h3 className="text-lg font-semibold text-slate-900">{t('user_mgmt')}</h3>
+                  <p className="text-sm text-slate-500">{t('user_mgmt_desc')}</p>
                 </div>
                 <button
                   onClick={() => setShowAddUser(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all"
                 >
                   <Plus className="w-4 h-4" />
-                  Add User
+                  {t('add_user')}
                 </button>
               </div>
 
@@ -147,11 +149,11 @@ const SettingsPage: React.FC = () => {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-100">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">User</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Email</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Role</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Joined</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Actions</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('user_label')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('email_label')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('role_label')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('joined')}</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">{t('actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -183,7 +185,7 @@ const SettingsPage: React.FC = () => {
                             <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                               <Edit className="w-4 h-4 text-slate-500" />
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleDeleteUser(u.id)}
                               className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                               disabled={u.id === user?.id}
@@ -211,27 +213,27 @@ const SettingsPage: React.FC = () => {
                       <MessageSquare className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">WhatsApp Business API</h3>
-                      <p className="text-sm text-slate-500">Connect to WhatsApp for broadcast messaging</p>
+                      <h3 className="text-lg font-semibold text-slate-900">{t('whatsapp_api')}</h3>
+                      <p className="text-sm text-slate-500">{t('wa_api_desc')}</p>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={integrations.whatsapp.enabled}
                       onChange={(e) => setIntegrations({
                         ...integrations,
                         whatsapp: { ...integrations.whatsapp, enabled: e.target.checked }
                       })}
-                      className="sr-only peer" 
+                      className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                   </label>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">API Key</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('api_key')}</label>
                     <div className="flex gap-3">
                       <input
                         type="password"
@@ -246,7 +248,7 @@ const SettingsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500" />
-                    <span className="text-green-600">Connected and verified</span>
+                    <span className="text-green-600">{t('connected_verified')}</span>
                   </div>
                 </div>
               </div>
@@ -259,27 +261,27 @@ const SettingsPage: React.FC = () => {
                       <Mail className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">Email Service (SendGrid)</h3>
-                      <p className="text-sm text-slate-500">SMTP configuration for email broadcasts</p>
+                      <h3 className="text-lg font-semibold text-slate-900">{t('email_service')} (SendGrid)</h3>
+                      <p className="text-sm text-slate-500">{t('email_api_desc')}</p>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={integrations.email.enabled}
                       onChange={(e) => setIntegrations({
                         ...integrations,
                         email: { ...integrations.email, enabled: e.target.checked }
                       })}
-                      className="sr-only peer" 
+                      className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Provider</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('provider')}</label>
                     <select className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option>SendGrid</option>
                       <option>Mailgun</option>
@@ -288,7 +290,7 @@ const SettingsPage: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">API Key</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('api_key')}</label>
                     <div className="flex gap-3">
                       <input
                         type="password"
@@ -303,7 +305,7 @@ const SettingsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500" />
-                    <span className="text-green-600">Connected and verified</span>
+                    <span className="text-green-600">{t('connected_verified')}</span>
                   </div>
                 </div>
               </div>
@@ -313,8 +315,8 @@ const SettingsPage: React.FC = () => {
           {/* Notifications */}
           {activeTab === 'notifications' && (
             <div className="bg-white rounded-2xl border border-slate-100 p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-6">Notification Preferences</h3>
-              
+              <h3 className="text-lg font-semibold text-slate-900 mb-6">{t('notif_prefs')}</h3>
+
               <div className="space-y-6">
                 {[
                   { title: 'New Lead Assigned', description: 'Get notified when a new lead is assigned to you' },
@@ -342,11 +344,11 @@ const SettingsPage: React.FC = () => {
           {activeTab === 'security' && (
             <div className="space-y-6">
               <div className="bg-white rounded-2xl border border-slate-100 p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-6">Security Settings</h3>
-                
+                <h3 className="text-lg font-semibold text-slate-900 mb-6">{t('security_settings')}</h3>
+
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('cur_password')}</label>
                     <input
                       type="password"
                       className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -354,7 +356,7 @@ const SettingsPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">New Password</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('new_password')}</label>
                     <input
                       type="password"
                       className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -362,7 +364,7 @@ const SettingsPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('conf_password')}</label>
                     <input
                       type="password"
                       className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -370,21 +372,21 @@ const SettingsPage: React.FC = () => {
                     />
                   </div>
                   <button className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all font-medium">
-                    Update Password
+                    {t('upd_password')}
                   </button>
                 </div>
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-100 p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Two-Factor Authentication</h3>
-                <p className="text-slate-500 mb-4">Add an extra layer of security to your account</p>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">{t('two_fa')}</h3>
+                <p className="text-slate-500 mb-4">{t('two_fa_desc')}</p>
                 <button className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors font-medium">
-                  Enable 2FA
+                  {t('enable_2fa')}
                 </button>
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-100 p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Active Sessions</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">{t('active_sessions')}</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                     <div className="flex items-center gap-3">
@@ -409,7 +411,7 @@ const SettingsPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddUser(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h2 className="text-xl font-semibold text-slate-900">Add New User</h2>
+              <h2 className="text-xl font-semibold text-slate-900">{t('add_user')}</h2>
               <button
                 onClick={() => setShowAddUser(false)}
                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -420,7 +422,7 @@ const SettingsPage: React.FC = () => {
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('full_name')}</label>
                 <input
                   type="text"
                   value={newUser.name}
@@ -430,7 +432,7 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('email_label')}</label>
                 <input
                   type="email"
                   value={newUser.email}
@@ -440,7 +442,7 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Role</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('role_label')}</label>
                 <select
                   value={newUser.role}
                   onChange={(e) => setNewUser({ ...newUser, role: e.target.value as UserRole })}
@@ -458,7 +460,7 @@ const SettingsPage: React.FC = () => {
                 onClick={() => setShowAddUser(false)}
                 className="px-6 py-2.5 text-slate-700 hover:bg-slate-200 rounded-xl transition-colors font-medium"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleAddUser}
@@ -466,7 +468,7 @@ const SettingsPage: React.FC = () => {
                 className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl transition-all font-medium disabled:opacity-50 flex items-center gap-2"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                Add User
+                {t('add_user')}
               </button>
             </div>
           </div>

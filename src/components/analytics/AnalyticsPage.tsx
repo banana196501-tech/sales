@@ -2,10 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PIPELINE_STAGES } from '@/types/sales';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
   DollarSign,
   Download,
   ArrowUpRight,
@@ -13,14 +13,15 @@ import {
   Award,
   Loader2
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
+import { useTranslation } from 'react-i18next';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
@@ -29,6 +30,7 @@ import {
 } from 'recharts';
 
 const AnalyticsPage: React.FC = () => {
+  const { t } = useTranslation();
   const { leads, campaigns, leadsLoading } = useSales();
   const { users } = useAuth();
   const [dateRange, setDateRange] = useState('year');
@@ -140,7 +142,7 @@ const AnalyticsPage: React.FC = () => {
       salesPerformance,
       productData,
     };
-    
+
     const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -154,7 +156,7 @@ const AnalyticsPage: React.FC = () => {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-          <p className="text-slate-500">Loading analytics...</p>
+          <p className="text-slate-500">{t('loading')} analytics...</p>
         </div>
       </div>
     );
@@ -165,8 +167,8 @@ const AnalyticsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Analytics & Reports</h2>
-          <p className="text-slate-500">Track your sales performance and insights</p>
+          <h2 className="text-2xl font-bold text-slate-900">{t('analytics')}</h2>
+          <p className="text-slate-500">{t('performance')} and insights</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -174,17 +176,17 @@ const AnalyticsPage: React.FC = () => {
             onChange={(e) => setDateRange(e.target.value)}
             className="px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="quarter">This Quarter</option>
-            <option value="year">This Year</option>
+            <option value="week">{t('this_week')}</option>
+            <option value="month">{t('this_month')}</option>
+            <option value="quarter">{t('this_quarter')}</option>
+            <option value="year">{t('this_year')}</option>
           </select>
           <button
             onClick={handleExportReport}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/30"
           >
             <Download className="w-4 h-4" />
-            Export
+            {t('export')}
           </button>
         </div>
       </div>
@@ -202,7 +204,7 @@ const AnalyticsPage: React.FC = () => {
             </span>
           </div>
           <p className="text-3xl font-bold">${(stats.revenue / 1000).toFixed(0)}K</p>
-          <p className="text-white/80 text-sm mt-1">Total Revenue</p>
+          <p className="text-white/80 text-sm mt-1">{t('total_revenue')}</p>
         </div>
 
         <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white">
@@ -216,7 +218,7 @@ const AnalyticsPage: React.FC = () => {
             </span>
           </div>
           <p className="text-3xl font-bold">{stats.closingRate}%</p>
-          <p className="text-white/80 text-sm mt-1">Closing Rate</p>
+          <p className="text-white/80 text-sm mt-1">{t('closing_rate')}</p>
         </div>
 
         <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white">
@@ -230,7 +232,7 @@ const AnalyticsPage: React.FC = () => {
             </span>
           </div>
           <p className="text-3xl font-bold">{stats.totalLeads}</p>
-          <p className="text-white/80 text-sm mt-1">Total Leads</p>
+          <p className="text-white/80 text-sm mt-1">{t('total_leads')}</p>
         </div>
 
         <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-5 text-white">
@@ -244,7 +246,7 @@ const AnalyticsPage: React.FC = () => {
             </span>
           </div>
           <p className="text-3xl font-bold">{stats.activeDeals}</p>
-          <p className="text-white/80 text-sm mt-1">Active Deals</p>
+          <p className="text-white/80 text-sm mt-1">{t('active_deals')}</p>
         </div>
       </div>
 
@@ -254,8 +256,8 @@ const AnalyticsPage: React.FC = () => {
         <div className="bg-white rounded-2xl p-5 border border-slate-100">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Revenue Trend</h3>
-              <p className="text-sm text-slate-500">Monthly revenue over time</p>
+              <h3 className="text-lg font-semibold text-slate-900">{t('revenue_trend')}</h3>
+              <p className="text-sm text-slate-500">{t('monthly_rev_desc')}</p>
             </div>
           </div>
           <div className="h-72">
@@ -263,14 +265,14 @@ const AnalyticsPage: React.FC = () => {
               <AreaChart data={monthlyRevenue}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 12 }} />
-                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `$${v/1000}K`} />
-                <Tooltip 
+                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `$${v / 1000}K`} />
+                <Tooltip
                   formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
@@ -284,8 +286,8 @@ const AnalyticsPage: React.FC = () => {
         <div className="bg-white rounded-2xl p-5 border border-slate-100">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Deals Closed</h3>
-              <p className="text-sm text-slate-500">Number of deals per month</p>
+              <h3 className="text-lg font-semibold text-slate-900">{t('deals_closed_label')}</h3>
+              <p className="text-sm text-slate-500">{t('deals_closed_desc')}</p>
             </div>
           </div>
           <div className="h-72">
@@ -294,7 +296,7 @@ const AnalyticsPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 12 }} />
                 <YAxis tick={{ fill: '#64748b', fontSize: 12 }} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Bar dataKey="deals" fill="#22c55e" radius={[6, 6, 0, 0]} />
@@ -309,8 +311,8 @@ const AnalyticsPage: React.FC = () => {
         {/* Conversion Funnel */}
         <div className="bg-white rounded-2xl p-5 border border-slate-100">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Conversion Funnel</h3>
-            <p className="text-sm text-slate-500">Lead progression through stages</p>
+            <h3 className="text-lg font-semibold text-slate-900">{t('conv_funnel')}</h3>
+            <p className="text-sm text-slate-500">{t('funnel_desc')}</p>
           </div>
           <div className="space-y-4">
             {funnelData.map((item, index) => (
@@ -320,9 +322,9 @@ const AnalyticsPage: React.FC = () => {
                   <span className="font-medium text-slate-900">{item.count}</span>
                 </div>
                 <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full rounded-full transition-all"
-                    style={{ 
+                    style={{
                       width: `${item.percentage}%`,
                       backgroundColor: COLORS[index % COLORS.length]
                     }}
@@ -336,8 +338,8 @@ const AnalyticsPage: React.FC = () => {
         {/* Lead Sources */}
         <div className="bg-white rounded-2xl p-5 border border-slate-100">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Lead Sources</h3>
-            <p className="text-sm text-slate-500">Where your leads come from</p>
+            <h3 className="text-lg font-semibold text-slate-900">{t('lead_sources')}</h3>
+            <p className="text-sm text-slate-500">{t('source_desc')}</p>
           </div>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
@@ -355,7 +357,7 @@ const AnalyticsPage: React.FC = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   formatter={(value: number) => [`${value}%`, 'Share']}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
@@ -376,23 +378,23 @@ const AnalyticsPage: React.FC = () => {
         {/* Top Products */}
         <div className="bg-white rounded-2xl p-5 border border-slate-100">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Top Products</h3>
-            <p className="text-sm text-slate-500">Best performing products</p>
+            <h3 className="text-lg font-semibold text-slate-900">{t('top_products')}</h3>
+            <p className="text-sm text-slate-500">{t('top_products_desc')}</p>
           </div>
           <div className="space-y-4">
             {productData.slice(0, 5).map((product, index) => (
               <div key={product.name} className="flex items-center gap-3">
                 <div className={`
                   w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold
-                  ${index === 0 ? 'bg-amber-100 text-amber-700' : 
-                    index === 1 ? 'bg-slate-100 text-slate-700' : 
-                    index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-50 text-slate-500'}
+                  ${index === 0 ? 'bg-amber-100 text-amber-700' :
+                    index === 1 ? 'bg-slate-100 text-slate-700' :
+                      index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-50 text-slate-500'}
                 `}>
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-slate-900 truncate text-sm">{product.name}</p>
-                  <p className="text-xs text-slate-500">{product.leads} leads</p>
+                  <p className="text-xs text-slate-500">{product.leads} {t('leads_found')}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-slate-900 text-sm">${(product.revenue / 1000).toFixed(0)}K</p>
@@ -408,8 +410,8 @@ const AnalyticsPage: React.FC = () => {
       <div className="bg-white rounded-2xl p-5 border border-slate-100">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Sales Team Performance</h3>
-            <p className="text-sm text-slate-500">Individual performance metrics</p>
+            <h3 className="text-lg font-semibold text-slate-900">{t('sales_performance')}</h3>
+            <p className="text-sm text-slate-500">{t('team_leaderboard')}</p>
           </div>
           <Award className="w-5 h-5 text-amber-500" />
         </div>
@@ -417,12 +419,12 @@ const AnalyticsPage: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="text-left text-sm text-slate-500 border-b border-slate-100">
-                <th className="pb-3 font-medium">Rank</th>
-                <th className="pb-3 font-medium">Sales Rep</th>
-                <th className="pb-3 font-medium">Leads Assigned</th>
-                <th className="pb-3 font-medium">Deals Closed</th>
-                <th className="pb-3 font-medium">Revenue</th>
-                <th className="pb-3 font-medium">Conversion Rate</th>
+                <th className="pb-3 font-medium">{t('rank')}</th>
+                <th className="pb-3 font-medium">{t('sales_rep')}</th>
+                <th className="pb-3 font-medium">{t('total_leads')}</th>
+                <th className="pb-3 font-medium">{t('deals_closed_label')}</th>
+                <th className="pb-3 font-medium">{t('revenue')}</th>
+                <th className="pb-3 font-medium">{t('conversion_rate')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -431,9 +433,9 @@ const AnalyticsPage: React.FC = () => {
                   <td className="py-4">
                     <div className={`
                       w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                      ${index === 0 ? 'bg-amber-100 text-amber-700' : 
-                        index === 1 ? 'bg-slate-100 text-slate-700' : 
-                        index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-50 text-slate-500'}
+                      ${index === 0 ? 'bg-amber-100 text-amber-700' :
+                        index === 1 ? 'bg-slate-100 text-slate-700' :
+                          index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-50 text-slate-500'}
                     `}>
                       {index + 1}
                     </div>
@@ -458,7 +460,7 @@ const AnalyticsPage: React.FC = () => {
                   <td className="py-4">
                     <div className="flex items-center gap-2">
                       <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
                           style={{ width: `${person.conversionRate}%` }}
                         />
@@ -471,7 +473,7 @@ const AnalyticsPage: React.FC = () => {
               {salesPerformance.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-500">
-                    No sales data available
+                    {t('no_sales_data')}
                   </td>
                 </tr>
               )}

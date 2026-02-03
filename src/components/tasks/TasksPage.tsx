@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Task } from '@/types/sales';
-import { 
-  CheckSquare, 
-  Plus, 
+import {
+  CheckSquare,
+  Plus,
   Calendar,
   Clock,
   User,
@@ -16,8 +16,10 @@ import {
   X,
   Loader2
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const TasksPage: React.FC = () => {
+  const { t } = useTranslation();
   const { tasks, leads, addTask, updateTask, deleteTask, tasksLoading } = useSales();
   const { user, users } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -47,14 +49,14 @@ const TasksPage: React.FC = () => {
     today: filteredTasks.filter(t => {
       const today = new Date();
       const dueDate = new Date(t.dueDate);
-      return t.status !== 'completed' && 
+      return t.status !== 'completed' &&
         dueDate.toDateString() === today.toDateString();
     }),
     upcoming: filteredTasks.filter(t => {
       const today = new Date();
       const dueDate = new Date(t.dueDate);
-      return t.status !== 'completed' && 
-        dueDate > today && 
+      return t.status !== 'completed' &&
+        dueDate > today &&
         dueDate.toDateString() !== today.toDateString();
     }),
     completed: filteredTasks.filter(t => t.status === 'completed'),
@@ -116,6 +118,24 @@ const TasksPage: React.FC = () => {
     }
   };
 
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high': return t('high');
+      case 'medium': return t('medium');
+      case 'low': return t('low');
+      default: return priority;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return t('pending');
+      case 'in_progress': return t('in_progress');
+      case 'completed': return t('completed');
+      default: return status;
+    }
+  };
+
   const TaskCard = ({ task }: { task: Task }) => {
     const lead = leads.find(l => l.id === task.leadId);
     const assignee = users.find(u => u.id === task.assignedTo);
@@ -132,8 +152,8 @@ const TasksPage: React.FC = () => {
             onClick={() => toggleTaskStatus(task)}
             className={`
               mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors
-              ${task.status === 'completed' 
-                ? 'bg-emerald-500 border-emerald-500 text-white' 
+              ${task.status === 'completed'
+                ? 'bg-emerald-500 border-emerald-500 text-white'
                 : 'border-slate-300 hover:border-indigo-500'}
             `}
           >
@@ -167,7 +187,7 @@ const TasksPage: React.FC = () => {
 
             <div className="flex flex-wrap items-center gap-3 mt-3">
               <span className={`text-xs px-2 py-1 rounded-lg font-medium ${getPriorityColor(task.priority)}`}>
-                {task.priority}
+                {getPriorityLabel(task.priority)}
               </span>
 
               <span className={`text-xs flex items-center gap-1 ${isOverdue ? 'text-red-600' : 'text-slate-500'}`}>
@@ -204,7 +224,7 @@ const TasksPage: React.FC = () => {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-          <p className="text-slate-500">Loading tasks...</p>
+          <p className="text-slate-500">{t('loading')} tasks...</p>
         </div>
       </div>
     );
@@ -215,8 +235,8 @@ const TasksPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Tasks</h2>
-          <p className="text-slate-500">{filteredTasks.filter(t => t.status !== 'completed').length} tasks remaining</p>
+          <h2 className="text-2xl font-bold text-slate-900">{t('tasks')}</h2>
+          <p className="text-slate-500">{filteredTasks.filter(t => t.status !== 'completed').length} {t('tasks_remaining')}</p>
         </div>
         <button
           onClick={() => {
@@ -235,7 +255,7 @@ const TasksPage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/30"
         >
           <Plus className="w-4 h-4" />
-          Add Task
+          {t('add_task')}
         </button>
       </div>
 
@@ -248,7 +268,7 @@ const TasksPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{groupedTasks.overdue.length}</p>
-              <p className="text-sm text-slate-500">Overdue</p>
+              <p className="text-sm text-slate-500">{t('overdue')}</p>
             </div>
           </div>
         </div>
@@ -259,7 +279,7 @@ const TasksPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{groupedTasks.today.length}</p>
-              <p className="text-sm text-slate-500">Due Today</p>
+              <p className="text-sm text-slate-500">{t('due_today')}</p>
             </div>
           </div>
         </div>
@@ -270,7 +290,7 @@ const TasksPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{groupedTasks.upcoming.length}</p>
-              <p className="text-sm text-slate-500">Upcoming</p>
+              <p className="text-sm text-slate-500">{t('upcoming')}</p>
             </div>
           </div>
         </div>
@@ -281,7 +301,7 @@ const TasksPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{groupedTasks.completed.length}</p>
-              <p className="text-sm text-slate-500">Completed</p>
+              <p className="text-sm text-slate-500">{t('completed_count')}</p>
             </div>
           </div>
         </div>
@@ -295,10 +315,10 @@ const TasksPage: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="appearance-none pl-4 pr-10 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
+            <option value="all">{t('all_status')}</option>
+            <option value="pending">{t('pending')}</option>
+            <option value="in_progress">{t('in_progress')}</option>
+            <option value="completed">{t('completed')}</option>
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
         </div>
@@ -309,10 +329,10 @@ const TasksPage: React.FC = () => {
             onChange={(e) => setFilterPriority(e.target.value)}
             className="appearance-none pl-4 pr-10 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700"
           >
-            <option value="all">All Priority</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
+            <option value="all">{t('all_priority')}</option>
+            <option value="high">{t('high')}</option>
+            <option value="medium">{t('medium')}</option>
+            <option value="low">{t('low')}</option>
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
         </div>
@@ -325,7 +345,7 @@ const TasksPage: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold text-red-600 uppercase tracking-wide mb-3 flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
-              Overdue ({groupedTasks.overdue.length})
+              {t('overdue')} ({groupedTasks.overdue.length})
             </h3>
             <div className="space-y-3">
               {groupedTasks.overdue.map(task => (
@@ -340,7 +360,7 @@ const TasksPage: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold text-amber-600 uppercase tracking-wide mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Due Today ({groupedTasks.today.length})
+              {t('due_today')} ({groupedTasks.today.length})
             </h3>
             <div className="space-y-3">
               {groupedTasks.today.map(task => (
@@ -355,7 +375,7 @@ const TasksPage: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              Upcoming ({groupedTasks.upcoming.length})
+              {t('upcoming')} ({groupedTasks.upcoming.length})
             </h3>
             <div className="space-y-3">
               {groupedTasks.upcoming.map(task => (
@@ -370,7 +390,7 @@ const TasksPage: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-3 flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              Completed ({groupedTasks.completed.length})
+              {t('completed_count')} ({groupedTasks.completed.length})
             </h3>
             <div className="space-y-3">
               {groupedTasks.completed.slice(0, 5).map(task => (
@@ -385,8 +405,8 @@ const TasksPage: React.FC = () => {
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckSquare className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-1">No tasks found</h3>
-            <p className="text-slate-500">Create a new task to get started</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-1">{t('no_tasks_found')}</h3>
+            <p className="text-slate-500">{t('create_task_start')}</p>
           </div>
         )}
       </div>
@@ -398,7 +418,7 @@ const TasksPage: React.FC = () => {
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
               <h2 className="text-xl font-semibold text-slate-900">
-                {editingTask ? 'Edit Task' : 'Add New Task'}
+                {editingTask ? t('edit_task') : t('add_new_task')}
               </h2>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -410,7 +430,7 @@ const TasksPage: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Title *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('title_label')} *</label>
                 <input
                   type="text"
                   value={formData.title}
@@ -422,7 +442,7 @@ const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('description_label')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -434,7 +454,7 @@ const TasksPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Due Date *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{t('due_date')} *</label>
                   <input
                     type="date"
                     value={formData.dueDate}
@@ -445,27 +465,27 @@ const TasksPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Priority</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{t('priority')}</label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
                     className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <option value="low">{t('low')}</option>
+                    <option value="medium">{t('medium')}</option>
+                    <option value="high">{t('high')}</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Related Lead</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('related_lead')}</label>
                 <select
                   value={formData.leadId}
                   onChange={(e) => setFormData({ ...formData, leadId: e.target.value })}
                   className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="">No lead</option>
+                  <option value="">{t('no_lead')}</option>
                   {leads.slice(0, 20).map(lead => (
                     <option key={lead.id} value={lead.id}>{lead.name} - {lead.company}</option>
                   ))}
@@ -473,7 +493,7 @@ const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Assign To</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('assign_to')}</label>
                 <select
                   value={formData.assignedTo}
                   onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
@@ -491,7 +511,7 @@ const TasksPage: React.FC = () => {
                   onClick={() => setShowAddModal(false)}
                   className="px-6 py-2.5 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors font-medium"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
@@ -499,7 +519,7 @@ const TasksPage: React.FC = () => {
                   className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition-all font-medium shadow-lg shadow-indigo-500/30 disabled:opacity-50 flex items-center gap-2"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {editingTask ? 'Update Task' : 'Add Task'}
+                  {editingTask ? t('update_task') : t('add_task')}
                 </button>
               </div>
             </form>

@@ -1,15 +1,16 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSales } from '@/contexts/SalesContext';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Kanban, 
-  MessageSquare, 
-  Mail, 
-  CheckSquare, 
-  BarChart3, 
-  Settings, 
+import { useTranslation } from 'react-i18next';
+import {
+  LayoutDashboard,
+  Users,
+  Kanban,
+  MessageSquare,
+  Mail,
+  CheckSquare,
+  BarChart3,
+  Settings,
   LogOut,
   ChevronLeft,
   Bell
@@ -23,23 +24,24 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onToggle }) => {
+  const { t } = useTranslation();
   const { user, logout, hasRole } = useAuth();
   const { notifications } = useSales();
-  
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'sales'] },
-    { id: 'leads', label: 'Leads', icon: Users, roles: ['admin', 'manager', 'sales'] },
-    { id: 'pipeline', label: 'Pipeline', icon: Kanban, roles: ['admin', 'manager', 'sales'] },
-    { id: 'whatsapp', label: 'WhatsApp', icon: MessageSquare, roles: ['admin', 'manager', 'sales'] },
-    { id: 'email', label: 'Email', icon: Mail, roles: ['admin', 'manager', 'sales'] },
-    { id: 'tasks', label: 'Tasks', icon: CheckSquare, roles: ['admin', 'manager', 'sales'] },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, roles: ['admin', 'manager'] },
-    { id: 'settings', label: 'Settings', icon: Settings, roles: ['admin'] },
+    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard, roles: ['admin', 'manager', 'sales'] },
+    { id: 'leads', label: t('leads'), icon: Users, roles: ['admin', 'manager', 'sales'] },
+    { id: 'pipeline', label: t('pipeline'), icon: Kanban, roles: ['admin', 'manager', 'sales'] },
+    { id: 'whatsapp', label: t('whatsapp'), icon: MessageSquare, roles: ['admin', 'manager', 'sales'] },
+    { id: 'email', label: t('email'), icon: Mail, roles: ['admin', 'manager', 'sales'] },
+    { id: 'tasks', label: t('tasks'), icon: CheckSquare, roles: ['admin', 'manager', 'sales'] },
+    { id: 'analytics', label: t('analytics'), icon: BarChart3, roles: ['admin', 'manager'] },
+    { id: 'settings', label: t('settings'), icon: Settings, roles: ['admin'] },
   ];
 
-  const filteredMenuItems = menuItems.filter(item => 
+  const filteredMenuItems = menuItems.filter(item =>
     hasRole(item.roles as any[])
   );
 
@@ -47,12 +49,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
-      
+
       {/* Sidebar */}
       <aside className={`
         fixed top-0 left-0 z-50 h-full bg-slate-900 text-white transition-all duration-300 ease-in-out
@@ -70,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
                 <span className="font-semibold text-lg">SalesHub</span>
               </div>
             )}
-            <button 
+            <button
               onClick={onToggle}
               className="p-2 hover:bg-slate-800 rounded-lg transition-colors hidden lg:block"
             >
@@ -84,15 +86,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
               {filteredMenuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
-                
+
                 return (
                   <li key={item.id}>
                     <button
                       onClick={() => onNavigate(item.id)}
                       className={`
                         w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
-                        ${isActive 
-                          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30' 
+                        ${isActive
+                          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                           : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                         }
                         ${!isOpen && 'lg:justify-center lg:px-0'}
@@ -119,7 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
               `}
             >
               <Bell className="w-5 h-5 flex-shrink-0" />
-              {isOpen && <span className="font-medium">Notifications</span>}
+              {isOpen && <span className="font-medium">{t('notifications')}</span>}
               {unreadCount > 0 && (
                 <span className={`
                   absolute bg-red-500 text-white text-xs font-bold rounded-full
@@ -135,8 +137,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
           <div className="border-t border-slate-700 p-4">
             <div className={`flex items-center gap-3 ${!isOpen && 'lg:justify-center'}`}>
               {user?.avatar ? (
-                <img 
-                  src={user.avatar} 
+                <img
+                  src={user.avatar}
                   alt={user.name}
                   className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-700"
                 />
@@ -152,7 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
                 </div>
               )}
             </div>
-            
+
             <button
               onClick={logout}
               className={`
@@ -162,7 +164,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
               `}
             >
               <LogOut className="w-5 h-5" />
-              {isOpen && <span className="text-sm">Logout</span>}
+              {isOpen && <span className="text-sm">{t('logout')}</span>}
             </button>
           </div>
         </div>

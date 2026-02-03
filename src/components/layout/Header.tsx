@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSales } from '@/contexts/SalesContext';
-import { Menu, Search, Bell, X, Check } from 'lucide-react';
+import { Menu, Search, Bell, X, Check, Globe, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   title: string;
@@ -9,10 +17,17 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { notifications, markNotificationRead, markAllNotificationsRead } = useSales();
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const currentLanguage = i18n.language === 'id' ? 'ID' : 'EN';
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -31,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
-    
+
     if (days > 0) return `${days}d ago`;
     if (hours > 0) return `${hours}h ago`;
     return 'Just now';
@@ -48,23 +63,51 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
           >
             <Menu className="w-6 h-6 text-slate-600" />
           </button>
-          
+
           <div>
             <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
             <p className="text-sm text-slate-500 hidden sm:block">
-              Welcome back, {user?.name?.split(' ')[0]}
+              {t('welcome')}, {user?.name?.split(' ')[0]}
             </p>
           </div>
         </div>
 
-        {/* Right side */}
         <div className="flex items-center gap-3">
+          {/* Language Switcher */}
+          <div className="mr-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-2 h-9 px-3 rounded-xl border border-slate-200 hover:bg-slate-50">
+                  <Globe className="w-4 h-4 text-slate-500" />
+                  <span className="text-sm font-medium text-slate-700">{currentLanguage}</span>
+                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 rounded-xl mt-1">
+                <DropdownMenuItem
+                  onClick={() => changeLanguage('id')}
+                  className="flex items-center justify-between py-2 cursor-pointer"
+                >
+                  <span className="text-sm">{t('indonesian')}</span>
+                  {i18n.language === 'id' && <Check className="w-4 h-4 text-indigo-600" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => changeLanguage('en')}
+                  className="flex items-center justify-between py-2 cursor-pointer"
+                >
+                  <span className="text-sm">{t('english')}</span>
+                  {i18n.language.startsWith('en') && <Check className="w-4 h-4 text-indigo-600" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           {/* Search */}
-          <div className="hidden md:flex items-center bg-slate-100 rounded-xl px-4 py-2 w-64">
+          <div className="hidden md:flex items-center bg-slate-100 rounded-xl px-4 py-2 w-48 lg:w-64">
             <Search className="w-4 h-4 text-slate-400 mr-2" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder={t('search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none outline-none text-sm w-full text-slate-700 placeholder-slate-400"
@@ -88,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
             {/* Notifications dropdown */}
             {showNotifications && (
               <>
-                <div 
+                <div
                   className="fixed inset-0 z-40"
                   onClick={() => setShowNotifications(false)}
                 />
@@ -104,7 +147,7 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
                       </button>
                     )}
                   </div>
-                  
+
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <div className="p-4 text-center text-slate-500">
@@ -135,7 +178,7 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
                       ))
                     )}
                   </div>
-                  
+
                   <div className="border-t border-slate-100 p-2">
                     <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium py-2 rounded-lg hover:bg-indigo-50 transition-colors">
                       View all notifications
@@ -149,8 +192,8 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
           {/* User avatar */}
           <div className="hidden sm:block">
             {user?.avatar ? (
-              <img 
-                src={user.avatar} 
+              <img
+                src={user.avatar}
                 alt={user.name}
                 className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-200"
               />

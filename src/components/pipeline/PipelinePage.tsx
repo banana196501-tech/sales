@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Lead, PIPELINE_STAGES, PipelineStage } from '@/types/sales';
-import { 
-  GripVertical, 
-  MoreVertical, 
-  Phone, 
-  Mail, 
+import {
+  GripVertical,
+  MoreVertical,
+  Phone,
+  Mail,
   Building,
   DollarSign,
   User,
@@ -14,15 +14,17 @@ import {
   Filter,
   Loader2
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const PipelinePage: React.FC = () => {
+  const { t } = useTranslation();
   const { leads, moveLead, leadsLoading } = useSales();
   const { users } = useAuth();
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
   const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(null);
   const [filterAssignee, setFilterAssignee] = useState<string>('');
 
-  const filteredLeads = filterAssignee 
+  const filteredLeads = filterAssignee
     ? leads.filter(l => l.assignedTo === filterAssignee)
     : leads;
 
@@ -67,7 +69,7 @@ const PipelinePage: React.FC = () => {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-          <p className="text-slate-500">Loading pipeline...</p>
+          <p className="text-slate-500">{t('loading')} pipeline...</p>
         </div>
       </div>
     );
@@ -78,10 +80,10 @@ const PipelinePage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Sales Pipeline</h2>
-          <p className="text-slate-500">Drag and drop leads between stages</p>
+          <h2 className="text-2xl font-bold text-slate-900">{t('pipeline')}</h2>
+          <p className="text-slate-500">{t('pipeline_desc')}</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -90,7 +92,7 @@ const PipelinePage: React.FC = () => {
               onChange={(e) => setFilterAssignee(e.target.value)}
               className="appearance-none pl-10 pr-10 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700"
             >
-              <option value="">All Team Members</option>
+              <option value="">{t('all_members')}</option>
               {users.filter(u => u.role === 'sales').map(user => (
                 <option key={user.id} value={user.id}>{user.name}</option>
               ))}
@@ -109,7 +111,7 @@ const PipelinePage: React.FC = () => {
               <span className="text-xs font-medium text-slate-500 truncate">{stage.label}</span>
             </div>
             <p className="text-lg font-bold text-slate-900">${(getTotalValue(stage.key) / 1000).toFixed(0)}K</p>
-            <p className="text-xs text-slate-400">{getLeadsByStage(stage.key).length} deals</p>
+            <p className="text-xs text-slate-400">{getLeadsByStage(stage.key).length} {t('deals_count')}</p>
           </div>
         ))}
       </div>
@@ -120,7 +122,7 @@ const PipelinePage: React.FC = () => {
           {PIPELINE_STAGES.map((stage) => {
             const stageLeads = getLeadsByStage(stage.key);
             const isDropTarget = dragOverStage === stage.key;
-            
+
             return (
               <div
                 key={stage.key}
@@ -154,7 +156,7 @@ const PipelinePage: React.FC = () => {
                   {stageLeads.map((lead) => {
                     const assignedUser = users.find(u => u.id === lead.assignedTo);
                     const isDragging = draggedLead?.id === lead.id;
-                    
+
                     return (
                       <div
                         key={lead.id}
@@ -225,7 +227,7 @@ const PipelinePage: React.FC = () => {
                                 <User className="w-3 h-3 text-slate-500" />
                               </div>
                             )}
-                            <span className="text-xs text-slate-500">{assignedUser?.name?.split(' ')[0] || 'Unassigned'}</span>
+                            <span className="text-xs text-slate-500">{assignedUser?.name?.split(' ')[0] || t('unassigned')}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <a
@@ -253,7 +255,7 @@ const PipelinePage: React.FC = () => {
                       <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center mb-2">
                         <Building className="w-6 h-6" />
                       </div>
-                      <p className="text-sm">No deals</p>
+                      <p className="text-sm">{t('no_deals')}</p>
                     </div>
                   )}
                 </div>

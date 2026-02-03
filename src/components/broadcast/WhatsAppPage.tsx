@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { BroadcastTemplate, BroadcastCampaign } from '@/types/sales';
-import { 
-  MessageSquare, 
-  Plus, 
-  Send, 
-  Clock, 
-  CheckCircle, 
+import {
+  MessageSquare,
+  Plus,
+  Send,
+  Clock,
+  CheckCircle,
   AlertCircle,
   Users,
   FileText,
@@ -18,8 +18,10 @@ import {
   Search,
   Filter
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const WhatsAppPage: React.FC = () => {
+  const { t } = useTranslation();
   const { templates, campaigns, leads, addCampaign, sendCampaign } = useSales();
   const [activeTab, setActiveTab] = useState<'campaigns' | 'templates'>('campaigns');
   const [showNewCampaign, setShowNewCampaign] = useState(false);
@@ -80,7 +82,7 @@ const WhatsAppPage: React.FC = () => {
     setScheduleDate('');
   };
 
-  const filteredLeads = leads.filter(lead => 
+  const filteredLeads = leads.filter(lead =>
     lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lead.company.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -90,15 +92,15 @@ const WhatsAppPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">WhatsApp Broadcast</h2>
-          <p className="text-slate-500">Send messages to your leads via WhatsApp Business API</p>
+          <h2 className="text-2xl font-bold text-slate-900">{t('whatsapp')}</h2>
+          <p className="text-slate-500">{t('broadcast_wa_desc')}</p>
         </div>
         <button
           onClick={() => setShowNewCampaign(true)}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-xl transition-all shadow-lg shadow-green-500/30"
         >
           <Plus className="w-4 h-4" />
-          New Campaign
+          {t('new_campaign')}
         </button>
       </div>
 
@@ -111,7 +113,7 @@ const WhatsAppPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{whatsappCampaigns.length}</p>
-              <p className="text-sm text-slate-500">Total Campaigns</p>
+              <p className="text-sm text-slate-500">{t('total_campaigns')}</p>
             </div>
           </div>
         </div>
@@ -124,7 +126,7 @@ const WhatsAppPage: React.FC = () => {
               <p className="text-2xl font-bold text-slate-900">
                 {whatsappCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)}
               </p>
-              <p className="text-sm text-slate-500">Messages Sent</p>
+              <p className="text-sm text-slate-500">{t('messages_sent')}</p>
             </div>
           </div>
         </div>
@@ -137,7 +139,7 @@ const WhatsAppPage: React.FC = () => {
               <p className="text-2xl font-bold text-slate-900">
                 {whatsappCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)}
               </p>
-              <p className="text-sm text-slate-500">Delivered</p>
+              <p className="text-sm text-slate-500">{t('delivered')}</p>
             </div>
           </div>
         </div>
@@ -150,7 +152,7 @@ const WhatsAppPage: React.FC = () => {
               <p className="text-2xl font-bold text-slate-900">
                 {whatsappCampaigns.reduce((sum, c) => sum + c.stats.read, 0)}
               </p>
-              <p className="text-sm text-slate-500">Read</p>
+              <p className="text-sm text-slate-500">{t('read')}</p>
             </div>
           </div>
         </div>
@@ -160,23 +162,21 @@ const WhatsAppPage: React.FC = () => {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setActiveTab('campaigns')}
-          className={`px-4 py-2 rounded-xl font-medium transition-colors ${
-            activeTab === 'campaigns'
+          className={`px-4 py-2 rounded-xl font-medium transition-colors ${activeTab === 'campaigns'
               ? 'bg-green-600 text-white'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
+            }`}
         >
-          Campaigns
+          {t('campaigns_tab')}
         </button>
         <button
           onClick={() => setActiveTab('templates')}
-          className={`px-4 py-2 rounded-xl font-medium transition-colors ${
-            activeTab === 'templates'
+          className={`px-4 py-2 rounded-xl font-medium transition-colors ${activeTab === 'templates'
               ? 'bg-green-600 text-white'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
+            }`}
         >
-          Templates
+          {t('templates_tab')}
         </button>
       </div>
 
@@ -187,21 +187,21 @@ const WhatsAppPage: React.FC = () => {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Campaign</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden md:table-cell">Recipients</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden lg:table-cell">Performance</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Date</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Actions</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('campaign_label')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('status')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden md:table-cell">{t('recipients')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 hidden lg:table-cell">{t('performance')}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('date_label')}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {whatsappCampaigns.map((campaign) => {
                   const template = templates.find(t => t.id === campaign.templateId);
-                  const deliveryRate = campaign.stats.total > 0 
-                    ? Math.round((campaign.stats.delivered / campaign.stats.total) * 100) 
+                  const deliveryRate = campaign.stats.total > 0
+                    ? Math.round((campaign.stats.delivered / campaign.stats.total) * 100)
                     : 0;
-                  
+
                   return (
                     <tr key={campaign.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
@@ -230,21 +230,21 @@ const WhatsAppPage: React.FC = () => {
                       <td className="px-6 py-4 hidden lg:table-cell">
                         <div className="flex items-center gap-4 text-sm">
                           <span className="text-slate-600">
-                            <span className="font-medium text-emerald-600">{campaign.stats.delivered}</span> delivered
+                            <span className="font-medium text-emerald-600">{campaign.stats.delivered}</span> {t('delivered').toLowerCase()}
                           </span>
                           <span className="text-slate-600">
-                            <span className="font-medium text-blue-600">{campaign.stats.read}</span> read
+                            <span className="font-medium text-blue-600">{campaign.stats.read}</span> {t('read').toLowerCase()}
                           </span>
                           <span className="text-slate-600">
-                            <span className="font-medium text-purple-600">{campaign.stats.replied}</span> replied
+                            <span className="font-medium text-purple-600">{campaign.stats.replied}</span> {t('replied').toLowerCase()}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm text-slate-600">
-                          {campaign.sentAt 
+                          {campaign.sentAt
                             ? new Date(campaign.sentAt).toLocaleDateString()
-                            : campaign.scheduledAt 
+                            : campaign.scheduledAt
                               ? `Scheduled: ${new Date(campaign.scheduledAt).toLocaleDateString()}`
                               : 'Not scheduled'}
                         </p>
@@ -277,14 +277,14 @@ const WhatsAppPage: React.FC = () => {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-1">No campaigns yet</h3>
-              <p className="text-slate-500 mb-4">Create your first WhatsApp broadcast campaign</p>
+              <h3 className="text-lg font-medium text-slate-900 mb-1">{t('no_campaigns')}</h3>
+              <p className="text-slate-500 mb-4">{t('create_wa_campaign_desc')}</p>
               <button
                 onClick={() => setShowNewCampaign(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Create Campaign
+                {t('create_campaign_btn')}
               </button>
             </div>
           )}
@@ -325,7 +325,7 @@ const WhatsAppPage: React.FC = () => {
             <div className="p-3 bg-green-100 rounded-xl mb-3">
               <Plus className="w-6 h-6 text-green-600" />
             </div>
-            <p className="font-medium text-slate-700">Add Template</p>
+            <p className="font-medium text-slate-700">{t('add_template')}</p>
           </button>
         </div>
       )}
@@ -336,13 +336,13 @@ const WhatsAppPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowNewCampaign(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="text-xl font-semibold text-slate-900">Create WhatsApp Campaign</h2>
+              <h2 className="text-xl font-semibold text-slate-900">{t('create_wa_campaign')}</h2>
             </div>
 
             <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
               {/* Campaign Name */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Campaign Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('campaign_name')}</label>
                 <input
                   type="text"
                   value={campaignName}
@@ -354,17 +354,16 @@ const WhatsAppPage: React.FC = () => {
 
               {/* Template Selection */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Message Template</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('message_template')}</label>
                 <div className="space-y-2">
                   {whatsappTemplates.map((template) => (
                     <button
                       key={template.id}
                       onClick={() => setSelectedTemplate(template.id)}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                        selectedTemplate === template.id
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedTemplate === template.id
                           ? 'border-green-500 bg-green-50'
                           : 'border-slate-200 hover:border-slate-300'
-                      }`}
+                        }`}
                     >
                       <p className="font-medium text-slate-900">{template.name}</p>
                       <p className="text-sm text-slate-500 line-clamp-2 mt-1">{template.content}</p>
@@ -376,7 +375,7 @@ const WhatsAppPage: React.FC = () => {
               {/* Recipients */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Select Recipients ({selectedLeads.length} selected)
+                  {t('select_recipients')} ({selectedLeads.length} {t('selected_count')})
                 </label>
                 <div className="relative mb-3">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -418,21 +417,21 @@ const WhatsAppPage: React.FC = () => {
                     onClick={() => setSelectedLeads(filteredLeads.map(l => l.id))}
                     className="text-sm text-green-600 hover:text-green-700"
                   >
-                    Select All
+                    {t('select_all')}
                   </button>
                   <span className="text-slate-300">|</span>
                   <button
                     onClick={() => setSelectedLeads([])}
                     className="text-sm text-slate-600 hover:text-slate-700"
                   >
-                    Clear
+                    {t('clear')}
                   </button>
                 </div>
               </div>
 
               {/* Schedule */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Schedule (Optional)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('schedule_optional')}</label>
                 <input
                   type="datetime-local"
                   value={scheduleDate}
@@ -447,14 +446,14 @@ const WhatsAppPage: React.FC = () => {
                 onClick={() => setShowNewCampaign(false)}
                 className="px-6 py-2.5 text-slate-700 hover:bg-slate-200 rounded-xl transition-colors font-medium"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleCreateCampaign}
                 disabled={!campaignName || !selectedTemplate || selectedLeads.length === 0}
                 className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:from-slate-300 disabled:to-slate-400 text-white rounded-xl transition-all font-medium shadow-lg shadow-green-500/30 disabled:shadow-none"
               >
-                Create Campaign
+                {t('create_campaign_btn')}
               </button>
             </div>
           </div>

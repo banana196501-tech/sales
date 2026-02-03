@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Lead, PIPELINE_STAGES, PipelineStage } from '@/types/sales';
-import { 
-  Search, 
-  Plus, 
-  Filter, 
-  Download, 
-  Upload, 
+import {
+  Search,
+  Plus,
+  Filter,
+  Download,
+  Upload,
   Phone,
   Mail,
   Building,
@@ -17,10 +17,12 @@ import {
   Eye,
   Loader2
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import LeadModal from './LeadModal';
 import LeadDetailModal from './LeadDetailModal';
 
 const LeadsPage: React.FC = () => {
+  const { t } = useTranslation();
   const { filteredLeads, leadFilters, setLeadFilters, deleteLead, importLeads, leadsLoading } = useSales();
   const { user, users } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
@@ -40,7 +42,7 @@ const LeadsPage: React.FC = () => {
   };
 
   const handleExportCSV = () => {
-    const headers = ['Name', 'Company', 'Email', 'Phone', 'Product Interest', 'Deal Value', 'Status', 'Tags'];
+    const headers = [t('name'), t('company'), t('email_label'), t('phone'), t('product_interest'), t('value'), t('status'), 'Tags'];
     const rows = filteredLeads.map(lead => [
       lead.name,
       lead.company,
@@ -51,7 +53,7 @@ const LeadsPage: React.FC = () => {
       lead.status,
       lead.tags.join('; ')
     ]);
-    
+
     const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -100,7 +102,7 @@ const LeadsPage: React.FC = () => {
   };
 
   const toggleSelectLead = (id: string) => {
-    setSelectedLeads(prev => 
+    setSelectedLeads(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
@@ -110,7 +112,7 @@ const LeadsPage: React.FC = () => {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-          <p className="text-slate-500">Loading leads...</p>
+          <p className="text-slate-500">{t('loading')} leads...</p>
         </div>
       </div>
     );
@@ -121,13 +123,13 @@ const LeadsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Leads</h2>
-          <p className="text-slate-500">{filteredLeads.length} leads found</p>
+          <h2 className="text-2xl font-bold text-slate-900">{t('leads')}</h2>
+          <p className="text-slate-500">{filteredLeads.length} {t('leads_found')}</p>
         </div>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl cursor-pointer transition-colors">
             <Upload className="w-4 h-4" />
-            <span className="text-sm font-medium hidden sm:inline">Import</span>
+            <span className="text-sm font-medium hidden sm:inline">{t('import')}</span>
             <input type="file" accept=".csv" onChange={handleImportCSV} className="hidden" />
           </label>
           <button
@@ -135,14 +137,14 @@ const LeadsPage: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors"
           >
             <Download className="w-4 h-4" />
-            <span className="text-sm font-medium hidden sm:inline">Export</span>
+            <span className="text-sm font-medium hidden sm:inline">{t('export')}</span>
           </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/30"
           >
             <Plus className="w-4 h-4" />
-            <span className="text-sm font-medium">Add Lead</span>
+            <span className="text-sm font-medium">{t('add_lead')}</span>
           </button>
         </div>
       </div>
@@ -155,13 +157,13 @@ const LeadsPage: React.FC = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search leads by name, company, or email..."
+              placeholder={t('search_leads_placeholder')}
               value={leadFilters.search}
               onChange={(e) => handleSearch(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             />
           </div>
-          
+
           {/* Status Filter */}
           <div className="relative">
             <select
@@ -169,7 +171,7 @@ const LeadsPage: React.FC = () => {
               onChange={(e) => handleStatusFilter(e.target.value as PipelineStage | 'all')}
               className="appearance-none pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700 cursor-pointer"
             >
-              <option value="all">All Statuses</option>
+              <option value="all">{t('all_statuses')}</option>
               {PIPELINE_STAGES.map(stage => (
                 <option key={stage.key} value={stage.key}>{stage.label}</option>
               ))}
@@ -180,12 +182,11 @@ const LeadsPage: React.FC = () => {
           {/* More Filters */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${
-              showFilters ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-            }`}
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${showFilters ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              }`}
           >
             <Filter className="w-5 h-5" />
-            <span className="font-medium">Filters</span>
+            <span className="font-medium">{t('filters')}</span>
           </button>
         </div>
 
@@ -194,13 +195,13 @@ const LeadsPage: React.FC = () => {
           <div className="px-4 pb-4 pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Product Filter */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Product Interest</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('product_interest')}</label>
               <select
                 value={leadFilters.product}
                 onChange={(e) => setLeadFilters({ ...leadFilters, product: e.target.value })}
                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="">All Products</option>
+                <option value="">{t('all_products')}</option>
                 {products.map(product => (
                   <option key={product} value={product}>{product}</option>
                 ))}
@@ -209,13 +210,13 @@ const LeadsPage: React.FC = () => {
 
             {/* Assigned To Filter */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Assigned To</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('assigned_to')}</label>
               <select
                 value={leadFilters.assignedTo}
                 onChange={(e) => setLeadFilters({ ...leadFilters, assignedTo: e.target.value })}
                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="">All Team Members</option>
+                <option value="">{t('all_members')}</option>
                 {users.filter(u => u.role === 'sales').map(user => (
                   <option key={user.id} value={user.id}>{user.name}</option>
                 ))}
@@ -224,7 +225,7 @@ const LeadsPage: React.FC = () => {
 
             {/* Deal Value Range */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Min Deal Value</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('min_value')}</label>
               <input
                 type="number"
                 value={leadFilters.minValue}
@@ -235,7 +236,7 @@ const LeadsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Max Deal Value</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('max_value')}</label>
               <input
                 type="number"
                 value={leadFilters.maxValue}
@@ -262,23 +263,23 @@ const LeadsPage: React.FC = () => {
                     className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
                 </th>
-                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700">Lead</th>
+                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700">{t('leads')}</th>
                 <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700 hidden md:table-cell">Contact</th>
-                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700 hidden lg:table-cell">Product</th>
-                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700">Value</th>
-                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
+                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700 hidden lg:table-cell">{t('product')}</th>
+                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700">{t('value')}</th>
+                <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700">{t('status')}</th>
                 <th className="px-4 py-4 text-left text-sm font-semibold text-slate-700 hidden xl:table-cell">Tags</th>
-                <th className="px-4 py-4 text-right text-sm font-semibold text-slate-700">Actions</th>
+                <th className="px-4 py-4 text-right text-sm font-semibold text-slate-700">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredLeads.map((lead) => {
                 const stage = PIPELINE_STAGES.find(s => s.key === lead.status);
                 const assignedUser = users.find(u => u.id === lead.assignedTo);
-                
+
                 return (
-                  <tr 
-                    key={lead.id} 
+                  <tr
+                    key={lead.id}
                     className="hover:bg-slate-50 transition-colors cursor-pointer"
                     onClick={() => setViewingLead(lead)}
                   >
@@ -357,7 +358,7 @@ const LeadsPage: React.FC = () => {
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this lead?')) {
+                            if (confirm(t('delete_confirm'))) {
                               deleteLead(lead.id);
                             }
                           }}
@@ -380,8 +381,8 @@ const LeadsPage: React.FC = () => {
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-1">No leads found</h3>
-            <p className="text-slate-500">Try adjusting your search or filters</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-1">{t('no_leads_found')}</h3>
+            <p className="text-slate-500">{t('adjust_search')}</p>
           </div>
         )}
       </div>
