@@ -67,10 +67,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
           <div className="flex items-center justify-between p-4 border-b border-slate-700">
             {isOpen && (
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center overflow-hidden p-1">
+                <div className="w-12 h-10 flex items-center justify-center overflow-hidden">
                   <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <span className="font-semibold text-lg">{t('app_name')}</span>
+                <span className="font-semibold text-base whitespace-nowrap truncate">{t('app_name')}</span>
               </div>
             )}
             <button

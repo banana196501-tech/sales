@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-2xl shadow-lg shadow-indigo-500/30 mb-4 overflow-hidden p-2">
+          <div className="inline-flex items-center justify-center w-48 h-24 mb-4 overflow-hidden">
             <img src={logo} alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-white">{t('app_name')}</h1>
