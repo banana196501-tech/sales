@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSales } from '@/contexts/SalesContext';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Search, Bell, X, Check, Globe, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,6 +20,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { notifications, markNotificationRead, markAllNotificationsRead } = useSales();
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,7 +55,7 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-sm transition-all duration-300">
       <div className="flex items-center justify-between px-4 py-3 lg:px-6">
         {/* Left side */}
         <div className="flex items-center gap-4">
@@ -122,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
             >
               <Bell className="w-5 h-5 text-slate-600" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg shadow-red-500/40 animate-pulse">
                   {unreadCount}
                 </span>
               )}
@@ -180,8 +182,14 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
                   </div>
 
                   <div className="border-t border-slate-100 p-2">
-                    <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium py-2 rounded-lg hover:bg-indigo-50 transition-colors">
-                      View all notifications
+                    <button
+                      onClick={() => {
+                        setShowNotifications(false);
+                        navigate('/notifications');
+                      }}
+                      className="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium py-2 rounded-lg hover:bg-indigo-50 transition-colors"
+                    >
+                      {t('view_all', 'View all')}
                     </button>
                   </div>
                 </div>

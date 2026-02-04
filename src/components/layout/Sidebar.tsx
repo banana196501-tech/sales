@@ -58,9 +58,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full bg-slate-900 text-white transition-all duration-300 ease-in-out
+        fixed lg:sticky top-0 left-0 z-50 h-screen bg-[#0f172a] text-white transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${isOpen ? 'w-64' : 'w-0 lg:w-20'}
-        lg:relative
+        border-r border-white/5 shadow-[1px_0_0_0_rgba(0,0,0,0.2)]
       `}>
         <div className={`flex flex-col h-full ${!isOpen && 'lg:items-center'} overflow-hidden`}>
           {/* Logo */}
@@ -93,17 +93,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
                     <button
                       onClick={() => onNavigate(item.id)}
                       className={`
-                        w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                        w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 relative overflow-hidden group
                         ${isActive
-                          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                          : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                          ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)] ring-1 ring-white/20'
+                          : 'text-slate-400 hover:bg-white/5 hover:text-white hover:shadow-lg hover:shadow-black/20'
                         }
                         ${!isOpen && 'lg:justify-center lg:px-0'}
                       `}
                       title={!isOpen ? item.label : undefined}
                     >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      {isOpen && <span className="font-medium">{item.label}</span>}
+                      <Icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                      {isOpen && <span className="font-medium tracking-wide">{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -135,23 +135,26 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
           </div>
 
           {/* User Profile */}
-          <div className="border-t border-slate-700 p-4">
+          <div className="mt-auto border-t border-white/5 p-4 bg-white/5">
             <div className={`flex items-center gap-3 ${!isOpen && 'lg:justify-center'}`}>
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-700"
-                />
-              ) : (
-                <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium">{user?.name?.charAt(0)}</span>
-                </div>
-              )}
+              <div className="relative">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-500/20 shadow-lg"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-white/10 shadow-lg">
+                    <span className="text-sm font-bold text-white">{user?.name?.charAt(0)}</span>
+                  </div>
+                )}
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#0f172a] rounded-full" />
+              </div>
               {isOpen && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user?.name}</p>
-                  <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
+                  <p className="text-sm font-bold text-white truncate">{user?.name}</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">{user?.role}</p>
                 </div>
               )}
             </div>
@@ -159,13 +162,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onTo
             <button
               onClick={logout}
               className={`
-                mt-4 w-full flex items-center gap-3 px-3 py-2 rounded-lg
-                text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-colors
+                mt-4 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
+                text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-all duration-300 group
                 ${!isOpen && 'lg:justify-center lg:px-0'}
               `}
             >
-              <LogOut className="w-5 h-5" />
-              {isOpen && <span className="text-sm">{t('logout')}</span>}
+              <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              {isOpen && <span className="text-sm font-bold">{t('logout')}</span>}
             </button>
           </div>
         </div>

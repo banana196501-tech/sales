@@ -17,16 +17,20 @@ import {
   Loader2
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/components/ui/use-toast';
+import ConfirmModal from '../ui/ConfirmModal';
 
 const TasksPage: React.FC = () => {
   const { t } = useTranslation();
-  const { tasks, leads, addTask, updateTask, deleteTask, tasksLoading } = useSales();
+  const { tasks, leads, addTask, updateTask, deleteTask, deleteAllTasks, tasksLoading } = useSales();
   const { user, users } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState<{ id?: string; type: 'single' | 'bulk' | 'truncate' } | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -70,8 +74,10 @@ const TasksPage: React.FC = () => {
     try {
       if (editingTask) {
         await updateTask(editingTask.id, formData);
+        toast({ title: t('task_updated'), description: t('task_updated_desc', { title: formData.title }) });
       } else {
         await addTask(formData);
+        toast({ title: t('task_created'), description: t('task_created_desc', { title: formData.title }) });
       }
 
       setShowAddModal(false);
@@ -85,6 +91,9 @@ const TasksPage: React.FC = () => {
         priority: 'medium',
         status: 'pending',
       });
+    } catch (error) {
+      console.error('Failed to save task:', error);
+      toast({ title: 'Error', description: 'Failed to save task', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -104,9 +113,45 @@ const TasksPage: React.FC = () => {
     setShowAddModal(true);
   };
 
+  const toggleSelectTask = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedTasks(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedTasks.length === filteredTasks.length && filteredTasks.length > 0) {
+      setSelectedTasks([]);
+    } else {
+      setSelectedTasks(filteredTasks.map(t => t.id));
+    }
+  };
+
   const toggleTaskStatus = async (task: Task) => {
     const newStatus = task.status === 'completed' ? 'pending' : 'completed';
     await updateTask(task.id, { status: newStatus });
+  };
+
+  const onConfirmDelete = async () => {
+    if (!confirmDelete) return;
+
+    try {
+      if (confirmDelete.type === 'single' && confirmDelete.id) {
+        await deleteTask(confirmDelete.id);
+      } else if (confirmDelete.type === 'bulk') {
+        for (const id of selectedTasks) {
+          await deleteTask(id);
+        }
+        setSelectedTasks([]);
+      } else if (confirmDelete.type === 'truncate') {
+        await deleteAllTasks();
+        setSelectedTasks([]);
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to delete task', variant: 'destructive' });
+    }
+    setConfirmDelete(null);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -146,8 +191,17 @@ const TasksPage: React.FC = () => {
         bg-white rounded-xl p-4 border transition-all hover:shadow-md
         ${task.status === 'completed' ? 'border-slate-100 opacity-60' : 'border-slate-200'}
         ${isOverdue ? 'border-l-4 border-l-red-500' : ''}
+        ${selectedTasks.includes(task.id) ? 'ring-2 ring-indigo-500 bg-indigo-50/30' : ''}
       `}>
         <div className="flex items-start gap-3">
+          <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              checked={selectedTasks.includes(task.id)}
+              onChange={(e) => toggleSelectTask(task.id, e as any)}
+              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            />
+          </div>
           <button
             onClick={() => toggleTaskStatus(task)}
             className={`
@@ -173,7 +227,7 @@ const TasksPage: React.FC = () => {
                   <Edit className="w-4 h-4 text-slate-400" />
                 </button>
                 <button
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => setConfirmDelete({ id: task.id, type: 'single' })}
                   className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <Trash2 className="w-4 h-4 text-red-400" />
@@ -238,25 +292,59 @@ const TasksPage: React.FC = () => {
           <h2 className="text-2xl font-bold text-slate-900">{t('tasks')}</h2>
           <p className="text-slate-500">{filteredTasks.filter(t => t.status !== 'completed').length} {t('tasks_remaining')}</p>
         </div>
-        <button
-          onClick={() => {
-            setEditingTask(null);
-            setFormData({
-              title: '',
-              description: '',
-              leadId: '',
-              assignedTo: user?.id || '',
-              dueDate: '',
-              priority: 'medium',
-              status: 'pending',
-            });
-            setShowAddModal(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/30"
-        >
-          <Plus className="w-4 h-4" />
-          {t('add_task')}
-        </button>
+        <div className="flex items-center gap-3">
+          {filteredTasks.length > 0 && (
+            <div className="flex items-center gap-2 mr-2">
+              <input
+                type="checkbox"
+                checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
+                onChange={toggleSelectAll}
+                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span className="text-sm text-slate-500 hidden sm:inline">{t('select_all')}</span>
+            </div>
+          )}
+
+          {selectedTasks.length > 0 ? (
+            <button
+              onClick={() => setConfirmDelete({ type: 'bulk' })}
+              className="flex items-center gap-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition-all shadow-lg shadow-red-100/50 active:scale-95"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                {selectedTasks.length === filteredTasks.length ? t('delete_all') : `${t('delete_selected')} (${selectedTasks.length})`}
+              </span>
+            </button>
+          ) : tasks.length > 0 && (
+            <button
+              onClick={() => setConfirmDelete({ type: 'truncate' })}
+              className="flex items-center gap-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition-colors"
+              title="Delete All Tasks"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline">{t('delete_all')}</span>
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setEditingTask(null);
+              setFormData({
+                title: '',
+                description: '',
+                leadId: '',
+                assignedTo: user?.id || '',
+                dueDate: '',
+                priority: 'medium',
+                status: 'pending',
+              });
+              setShowAddModal(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/30"
+          >
+            <Plus className="w-4 h-4" />
+            {t('add_task')}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -526,6 +614,28 @@ const TasksPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={onConfirmDelete}
+        title={
+          confirmDelete?.type === 'truncate' ? t('delete_all_tasks') :
+            confirmDelete?.type === 'bulk' ? t('delete_selected') :
+              t('delete')
+        }
+        message={
+          confirmDelete?.type === 'truncate' ? t('truncate_tasks_confirm') :
+            confirmDelete?.type === 'bulk' ? t('delete_task_confirm_bulk', { count: selectedTasks.length }) :
+              t('delete_task_confirm')
+        }
+        confirmText={
+          confirmDelete?.type === 'truncate' ? t('yes_delete_all') :
+            confirmDelete?.type === 'bulk' ? t('yes_delete_selected') :
+              t('yes_delete')
+        }
+        variant="danger"
+      />
     </div>
   );
 };

@@ -12,6 +12,8 @@ interface AuthContextType {
   logout: () => void;
   hasRole: (roles: UserRole[]) => boolean;
   refreshUsers: () => Promise<void>;
+  updateProfile: (updates: { name?: string; email?: string; avatar?: string }) => Promise<void>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,11 +51,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initAuth = async () => {
       // Load users from database
       const fetchedUsers = await loadUsers();
-      
+
       // Check for existing session
       const storedUser = localStorage.getItem('salesapp_user');
       const storedToken = localStorage.getItem('salesapp_token');
-      
+
       if (storedUser && storedToken) {
         try {
           const parsedUser = JSON.parse(storedUser);
@@ -82,28 +84,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
-    
+
     try {
       // Find user in database
       const foundUser = await db.users.getByEmail(email);
-      
-      if (foundUser && password.length >= 4) {
+
+      const isValidPassword = foundUser && (
+        foundUser.password
+          ? foundUser.password === password
+          : password.length >= 4
+      );
+
+      if (foundUser && isValidPassword) {
         // Generate mock JWT token
         const mockToken = btoa(JSON.stringify({ userId: foundUser.id, exp: Date.now() + 86400000 }));
-        
+
         localStorage.setItem('salesapp_user', JSON.stringify(foundUser));
         localStorage.setItem('salesapp_token', mockToken);
         setUser(foundUser);
         setIsLoading(false);
-        
+
         toast({
           title: 'Welcome back!',
           description: `Logged in as ${foundUser.name}`,
         });
-        
+
         return true;
       }
-      
+
       setIsLoading(false);
       toast({
         title: 'Login failed',
@@ -138,6 +146,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return roles.includes(user.role);
   };
 
+  const updateProfile = async (updates: { name?: string; email?: string; avatar?: string }) => {
+    if (!user) return;
+    try {
+      const updatedUser = await db.users.update(user.id, updates);
+      setUser(updatedUser);
+      localStorage.setItem('salesapp_user', JSON.stringify(updatedUser));
+      toast({ title: 'Profile updated', description: 'Your profile has been updated successfully.' });
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast({ title: 'Error', description: 'Failed to update profile', variant: 'destructive' });
+      throw error;
+    }
+  };
+
+  const updatePassword = async (oldPassword: string, newPassword: string) => {
+    if (!user) return;
+
+    // In a real app, we would verify oldPassword hash. 
+    // Here we check against stored password if it exists.
+    if (user.password && user.password !== oldPassword) {
+      throw new Error('Current password incorrect');
+    }
+
+    try {
+      const updatedUser = await db.users.update(user.id, { password: newPassword });
+      setUser(updatedUser);
+      localStorage.setItem('salesapp_user', JSON.stringify(updatedUser));
+      toast({ title: 'Password updated', description: 'Your password has been changed successfully.' });
+    } catch (error) {
+      console.error('Failed to update password:', error);
+      toast({ title: 'Error', description: 'Failed to update password', variant: 'destructive' });
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -149,6 +192,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         hasRole,
         refreshUsers,
+        updateProfile,
+        updatePassword,
       }}
     >
       {children}

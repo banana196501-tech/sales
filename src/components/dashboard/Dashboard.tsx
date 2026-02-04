@@ -13,11 +13,11 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 import { useTranslation } from 'react-i18next';
-import { PIPELINE_STAGES } from '@/types/sales';
+
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { leads, tasks, leadsLoading } = useSales();
+  const { leads, tasks, leadsLoading, pipelineStages } = useSales();
   const { users } = useAuth();
 
   // Calculate stats from real data
@@ -37,13 +37,13 @@ const Dashboard: React.FC = () => {
 
   // Pipeline data
   const pipelineData = useMemo(() => {
-    return PIPELINE_STAGES.map(stage => ({
-      stage: stage.key,
+    return pipelineStages.map(stage => ({
+      stage: stage.id,
       label: stage.label,
-      count: leads.filter(l => l.status === stage.key).length,
-      value: leads.filter(l => l.status === stage.key).reduce((sum, l) => sum + l.dealValue, 0),
+      count: leads.filter(l => l.status === stage.id).length,
+      value: leads.filter(l => l.status === stage.id).reduce((sum, l) => sum + l.dealValue, 0),
     }));
-  }, [leads]);
+  }, [leads, pipelineStages]);
 
   // Sales performance
   const salesPerformance = useMemo(() => {
@@ -92,7 +92,7 @@ const Dashboard: React.FC = () => {
     },
     {
       title: t('revenue'),
-      value: `$${(stats.revenue / 1000).toFixed(0)}K`,
+      value: `Rp ${(stats.revenue / 1000000).toFixed(1)}M`,
       change: '+18%',
       positive: true,
       icon: DollarSign,
@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
           return (
             <div
               key={index}
-              className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+              className="bg-white rounded-[20px] p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100/60 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-indigo-100/50 transition-all duration-300 group"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -146,7 +146,7 @@ const Dashboard: React.FC = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pipeline Value Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div className="lg:col-span-2 bg-white rounded-[24px] p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100/60">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold text-slate-900">{t('revenue_chart')}</h3>
@@ -158,9 +158,9 @@ const Dashboard: React.FC = () => {
               <BarChart data={pipelineData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
-                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `$${v / 1000}K`} />
+                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `Rp ${v / 1000000}M`} />
                 <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Value']}
+                  formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Value']}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Bar dataKey="value" fill="url(#colorRevenue)" radius={[6, 6, 0, 0]} />
@@ -176,7 +176,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Pipeline Distribution */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100/60">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-slate-900">{t('distribution')}</h3>
             <p className="text-sm text-slate-500">{t('leads')} {t('status')}</p>
@@ -220,7 +220,7 @@ const Dashboard: React.FC = () => {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sales Performance */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100/60">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold text-slate-900">{t('sales_performance')}</h3>
@@ -254,7 +254,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-slate-900">${(person.revenue / 1000).toFixed(0)}K</p>
+                    <p className="font-semibold text-slate-900">Rp {(person.revenue / 1000000).toFixed(1)}M</p>
                     <p className="text-sm text-emerald-600">{person.conversionRate}% rate</p>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Tasks Overview */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100/60">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold text-slate-900">{t('tasks_overview')}</h3>
@@ -316,7 +316,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100/60">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-slate-900">{t('recent_leads')}</h3>
@@ -336,7 +336,7 @@ const Dashboard: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {leads.slice(0, 5).map((lead) => {
-                const stage = PIPELINE_STAGES.find(s => s.key === lead.status);
+                const stage = pipelineStages.find(s => s.id === lead.status);
                 return (
                   <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3">
@@ -345,7 +345,7 @@ const Dashboard: React.FC = () => {
                     </td>
                     <td className="py-3 text-slate-600">{lead.company}</td>
                     <td className="py-3 text-slate-600 hidden md:table-cell">{lead.productInterest}</td>
-                    <td className="py-3 font-medium text-slate-900">${lead.dealValue.toLocaleString()}</td>
+                    <td className="py-3 font-medium text-slate-900">Rp {lead.dealValue.toLocaleString('id-ID')}</td>
                     <td className="py-3">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${stage?.color} text-white`}>
                         {stage?.label}

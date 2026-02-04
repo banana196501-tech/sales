@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 
 
 // Initialize database client
-const supabaseUrl = 'https://drlesfoyosvosmbovwsr.databasepad.com';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImQyM2Q4ZjMxLTk1OWQtNDQ4My1hZjFmLTVkYmQ2NzdmNTcxZiJ9.eyJwcm9qZWN0SWQiOiJkcmxlc2ZveW9zdm9zbWJvdndzciIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzcwMDg4ODI5LCJleHAiOjIwODU0NDg4MjksImlzcyI6ImZhbW91cy5kYXRhYmFzZXBhZCIsImF1ZCI6ImZhbW91cy5jbGllbnRzIn0.FzFGNgEI13Vth7oIVe0119tCQEkceK-zERlT9T6Feno';
+const supabaseUrl = 'https://xpxsluytdqeqfhjrjokd.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhweHNsdXl0ZHFlcWZoanJqb2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNzczNDMsImV4cCI6MjA4NTY1MzM0M30.g-BBM8a2tRsXnl4uvmcX2sHNt-l7RZM-CQUalhTeqeo';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 

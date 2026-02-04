@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Lead, PIPELINE_STAGES, CommunicationLog } from '@/types/sales';
-import { 
-  X, 
-  Phone, 
-  Mail, 
-  Building, 
-  Calendar, 
-  Tag, 
-  Edit, 
+import { Lead, CommunicationLog } from '@/types/sales';
+import {
+  X,
+  Phone,
+  Mail,
+  Building,
+  Calendar,
+  Tag,
+  Edit,
   MessageSquare,
   Send,
   Clock,
@@ -18,6 +18,8 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface LeadDetailModalProps {
   lead: Lead;
@@ -26,26 +28,61 @@ interface LeadDetailModalProps {
 }
 
 const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ lead, onClose, onEdit }) => {
-  const { communicationLogs, addCommunicationLog } = useSales();
+  const { t } = useTranslation();
+  const { communicationLogs, addCommunicationLog, tasks, pipelineStages } = useSales();
   const { user, users } = useAuth();
   const [activeTab, setActiveTab] = useState<'details' | 'activity' | 'notes'>('details');
   const [newNote, setNewNote] = useState('');
 
   const leadLogs = communicationLogs.filter(log => log.leadId === lead.id);
-  const stage = PIPELINE_STAGES.find(s => s.key === lead.status);
+  const leadTasks = tasks.filter(task => task.leadId === lead.id);
+
+  // Combine logs and tasks into a single feed
+  const allActivity = [
+    ...leadLogs.map(log => ({
+      ...log,
+      activityType: 'communication' as const,
+      date: new Date(log.createdAt)
+    })),
+    ...leadTasks.map(task => ({
+      ...task,
+      activityType: 'task' as const,
+      date: new Date(task.createdAt),
+      type: 'task' as const // For icon/color mapping
+    })),
+    // Include base notes from the lead record if present
+    ...(lead.notes ? [{
+      id: 'initial-note',
+      leadId: lead.id,
+      type: 'note' as const,
+      content: lead.notes,
+      subject: 'Informasi Tambahan / Catatan Awal',
+      status: 'delivered' as const,
+      createdBy: lead.assignedTo,
+      createdAt: lead.createdAt,
+      date: new Date(lead.createdAt),
+      activityType: 'communication' as const
+    }] : [])
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  const stage = pipelineStages.find(s => s.id === lead.status);
   const assignedUser = users.find(u => u.id === lead.assignedTo);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
-    
-    await addCommunicationLog({
-      leadId: lead.id,
-      type: 'note',
-      content: newNote,
-      status: 'delivered',
-      createdBy: user?.id || '',
-    });
-    setNewNote('');
+    try {
+      await addCommunicationLog({
+        leadId: lead.id,
+        type: 'note',
+        content: newNote,
+        status: 'delivered',
+        createdBy: user?.id || '',
+      });
+      toast({ title: t('note_added'), description: t('note_added_desc') });
+      setNewNote('');
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to add note', variant: 'destructive' });
+    }
   };
 
   const getLogIcon = (type: string) => {
@@ -54,6 +91,7 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ lead, onClose, onEdit
       case 'whatsapp': return <MessageSquare className="w-4 h-4" />;
       case 'call': return <Phone className="w-4 h-4" />;
       case 'meeting': return <Calendar className="w-4 h-4" />;
+      case 'task': return <CheckCircle className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
@@ -75,7 +113,7 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ lead, onClose, onEdit
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      
+
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
         {/* Header */}
@@ -86,33 +124,39 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ lead, onClose, onEdit
           >
             <X className="w-5 h-5 text-white" />
           </button>
-          
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
-              {lead.name.charAt(0)}
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white">{lead.name}</h2>
-              <p className="text-white/80 flex items-center gap-2 mt-1">
-                <Building className="w-4 h-4" />
-                {lead.company}
-              </p>
-              <div className="flex items-center gap-3 mt-3">
-                <span className={`px-3 py-1 rounded-lg text-sm font-medium ${stage?.color} text-white`}>
-                  {stage?.label}
-                </span>
-                <span className="text-white/80 text-sm">
-                  Deal Value: <span className="font-semibold text-white">${lead.dealValue.toLocaleString()}</span>
-                </span>
+
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4 flex-1">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-inner">
+                {lead.name.charAt(0)}
+              </div>
+              <div className="flex-1 pt-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-2xl font-bold text-white leading-tight">{lead.name}</h2>
+                  <button
+                    onClick={onEdit}
+                    className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex items-center gap-1.5 text-xs font-semibold backdrop-blur-sm border border-white/10"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                    <span>{t('edit')}</span>
+                  </button>
+                </div>
+                <p className="text-white/80 flex items-center gap-2 mt-2 font-medium">
+                  <Building className="w-4 h-4" />
+                  {lead.company}
+                </p>
+                <div className="flex items-center gap-3 mt-4">
+                  <span className={`px-3 py-1 rounded-lg text-sm font-bold ${stage?.color} text-white shadow-sm`}>
+                    {stage?.label}
+                  </span>
+                  <span className="text-white/80 text-sm">
+                    {t('value')}: <span className="font-bold text-white italic">Rp {lead.dealValue.toLocaleString('id-ID')}</span>
+                  </span>
+                </div>
               </div>
             </div>
-            <button
-              onClick={onEdit}
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-colors"
-            >
-              <Edit className="w-4 h-4" />
-              Edit
-            </button>
+            {/* Close button space placeholder */}
+            <div className="w-10 h-10 shrink-0" />
           </div>
         </div>
 
@@ -122,11 +166,10 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ lead, onClose, onEdit
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
-                activeTab === tab
-                  ? 'text-indigo-600 border-b-2 border-indigo-600'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
+              className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${activeTab === tab
+                ? 'text-indigo-600 border-b-2 border-indigo-600'
+                : 'text-slate-500 hover:text-slate-700'
+                }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -192,10 +235,10 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ lead, onClose, onEdit
                   <div className="p-4 bg-slate-50 rounded-xl">
                     <p className="text-sm text-slate-500">Created</p>
                     <p className="text-slate-900 font-medium">
-                      {new Date(lead.createdAt).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      {new Date(lead.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                       })}
                     </p>
                   </div>
@@ -256,34 +299,56 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ lead, onClose, onEdit
 
           {activeTab === 'activity' && (
             <div className="space-y-4">
-              {leadLogs.length > 0 ? (
-                leadLogs.map((log) => {
-                  const creator = users.find(u => u.id === log.createdBy);
+              {allActivity.length > 0 ? (
+                allActivity.map((item: any) => {
+                  const creator = users.find(u => u.id === item.createdBy || u.id === item.assignedTo);
+                  const isTask = item.activityType === 'task';
+
                   return (
-                    <div key={log.id} className="flex gap-4 p-4 bg-slate-50 rounded-xl">
-                      <div className={`p-2 rounded-lg ${
-                        log.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                        log.type === 'whatsapp' ? 'bg-green-100 text-green-600' :
-                        log.type === 'call' ? 'bg-amber-100 text-amber-600' :
-                        log.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                        'bg-slate-200 text-slate-600'
-                      }`}>
-                        {getLogIcon(log.type)}
+                    <div key={item.id} className="flex gap-4 p-4 bg-slate-50 rounded-xl relative overflow-hidden group">
+                      {isTask && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400" />}
+                      <div className={`p-2 rounded-lg h-fit ${item.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                        item.type === 'whatsapp' ? 'bg-green-100 text-green-600' :
+                          item.type === 'call' ? 'bg-amber-100 text-amber-600' :
+                            item.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                              item.type === 'task' ? 'bg-indigo-100 text-indigo-600' :
+                                'bg-slate-200 text-slate-600'
+                        }`}>
+                        {getLogIcon(item.type)}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="font-medium text-slate-900 capitalize">{log.type}</p>
-                          <div className="flex items-center gap-2 text-sm text-slate-500">
-                            {getStatusIcon(log.status)}
-                            <span className="capitalize">{log.status}</span>
+                          <p className="font-bold text-slate-900 capitalize">
+                            {isTask ? `Task: ${item.title}` : item.type}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs font-medium px-2 py-1 bg-white rounded-lg shadow-sm border border-slate-100">
+                            {isTask ? (
+                              <>
+                                <span className={`w-2 h-2 rounded-full ${item.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-500'
+                                  }`} />
+                                <span className="capitalize">{item.status}</span>
+                              </>
+                            ) : (
+                              <>
+                                {getStatusIcon(item.status)}
+                                <span className="capitalize ml-1">{item.status}</span>
+                              </>
+                            )}
                           </div>
                         </div>
-                        {log.subject && <p className="text-sm text-slate-600 mt-1">{log.subject}</p>}
-                        <p className="text-slate-600 mt-1">{log.content}</p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-slate-400">
-                          <span>{creator?.name || 'Unknown'}</span>
-                          <span>•</span>
-                          <span>{new Date(log.createdAt).toLocaleString()}</span>
+                        {!isTask && item.subject && <p className="text-sm font-semibold text-slate-700 mt-1">{item.subject}</p>}
+                        <p className="text-slate-600 mt-1 text-sm leading-relaxed">
+                          {isTask ? item.description : item.content}
+                        </p>
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
+                          <div className="flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            <span>{creator?.name || 'Unknown'}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{item.date.toLocaleString()}</span>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -1,24 +1,32 @@
 import { supabase } from './supabase';
-import { Lead, Task, BroadcastTemplate, BroadcastCampaign, CommunicationLog, Notification, User, PipelineStage } from '@/types/sales';
+import { Lead, Task, BroadcastTemplate, BroadcastCampaign, CommunicationLog, Notification, User, PipelineStage, Product, PipelineStageConfig } from '@/types/sales';
 
 // Type mappings from database to frontend
-interface DbUser {
+export interface DbUser {
   id: string;
   email: string;
   name: string;
   role: 'admin' | 'manager' | 'sales';
   avatar: string | null;
+  password: string | null;
   created_at: string;
   updated_at: string;
 }
 
-interface DbLead {
+export interface DbProduct {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface DbLead {
   id: string;
   name: string;
   company: string;
   phone: string | null;
   email: string;
-  product_interest: string | null;
+  product_interest: string[] | null;
   deal_value: number;
   status: PipelineStage;
   tags: string[];
@@ -29,7 +37,7 @@ interface DbLead {
   updated_at: string;
 }
 
-interface DbTask {
+export interface DbTask {
   id: string;
   title: string;
   description: string | null;
@@ -42,18 +50,19 @@ interface DbTask {
   updated_at: string;
 }
 
-interface DbTemplate {
+export interface DbTemplate {
   id: string;
   name: string;
   type: 'email' | 'whatsapp';
   subject: string | null;
   content: string;
   variables: string[];
+  attachments: string[] | null;
   created_at: string;
   updated_at: string;
 }
 
-interface DbCampaign {
+export interface DbCampaign {
   id: string;
   name: string;
   type: 'email' | 'whatsapp';
@@ -95,22 +104,30 @@ interface DbNotification {
 }
 
 // Transform functions
-const transformUser = (db: DbUser): User => ({
+export const transformUser = (db: DbUser): User => ({
   id: db.id,
   email: db.email,
   name: db.name,
   role: db.role,
   avatar: db.avatar || undefined,
+  password: db.password || undefined,
   createdAt: db.created_at,
 });
 
-const transformLead = (db: DbLead): Lead => ({
+export const transformProduct = (db: DbProduct): Product => ({
+  id: db.id,
+  name: db.name,
+  description: db.description || undefined,
+  createdAt: db.created_at,
+});
+
+export const transformLead = (db: DbLead): Lead => ({
   id: db.id,
   name: db.name,
   company: db.company,
   phone: db.phone || '',
   email: db.email,
-  productInterest: db.product_interest || '',
+  productInterest: db.product_interest || [],
   dealValue: Number(db.deal_value),
   status: db.status,
   tags: db.tags || [],
@@ -121,7 +138,7 @@ const transformLead = (db: DbLead): Lead => ({
   updatedAt: db.updated_at,
 });
 
-const transformTask = (db: DbTask): Task => ({
+export const transformTask = (db: DbTask): Task => ({
   id: db.id,
   title: db.title,
   description: db.description || '',
@@ -133,18 +150,19 @@ const transformTask = (db: DbTask): Task => ({
   createdAt: db.created_at,
 });
 
-const transformTemplate = (db: DbTemplate): BroadcastTemplate => ({
+export const transformTemplate = (db: DbTemplate): BroadcastTemplate => ({
   id: db.id,
   name: db.name,
   type: db.type,
   subject: db.subject || undefined,
   content: db.content,
   variables: db.variables || [],
+  attachments: db.attachments || [],
   createdAt: db.created_at,
   updatedAt: db.updated_at,
 });
 
-const transformCampaign = (db: DbCampaign): BroadcastCampaign => ({
+export const transformCampaign = (db: DbCampaign): BroadcastCampaign => ({
   id: db.id,
   name: db.name,
   type: db.type,
@@ -157,7 +175,7 @@ const transformCampaign = (db: DbCampaign): BroadcastCampaign => ({
   createdAt: db.created_at,
 });
 
-const transformCommunicationLog = (db: DbCommunicationLog): CommunicationLog => ({
+export const transformCommunicationLog = (db: DbCommunicationLog): CommunicationLog => ({
   id: db.id,
   leadId: db.lead_id,
   type: db.type,
@@ -179,6 +197,46 @@ const transformNotification = (db: DbNotification): Notification => ({
 
 // Database API
 export const db = {
+  // Products
+  products: {
+    async getAll(): Promise<Product[]> {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('CRITICAL ERROR - Products Table Fetch Failed:', error);
+        throw error;
+      }
+      return (data || []).map(transformProduct);
+    },
+    async create(product: Omit<Product, 'id' | 'createdAt'>): Promise<Product> {
+      const { data, error } = await supabase.from('products').insert({
+        name: product.name,
+        description: product.description,
+      }).select().single();
+      if (error) throw error;
+      return transformProduct(data);
+    },
+    async update(id: string, updates: Partial<Product>): Promise<Product> {
+      const { data, error } = await supabase.from('products').update({
+        name: updates.name,
+        description: updates.description,
+      }).eq('id', id).select().single();
+      if (error) throw error;
+      return transformProduct(data);
+    },
+    async delete(id: string): Promise<void> {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+    },
+    async deleteAll(): Promise<void> {
+      const { error } = await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+    },
+  },
+
   // Users
   users: {
     async getAll(): Promise<User[]> {
@@ -204,8 +262,10 @@ export const db = {
     async update(id: string, updates: Partial<User>): Promise<User> {
       const { data, error } = await supabase.from('users').update({
         name: updates.name,
+        email: updates.email,
         role: updates.role,
         avatar: updates.avatar,
+        password: updates.password,
         updated_at: new Date().toISOString(),
       }).eq('id', id).select().single();
       if (error) throw error;
@@ -268,6 +328,10 @@ export const db = {
       const { error } = await supabase.from('leads').delete().eq('id', id);
       if (error) throw error;
     },
+    async deleteAll(): Promise<void> {
+      const { error } = await supabase.from('leads').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+    },
   },
 
   // Tasks
@@ -308,6 +372,10 @@ export const db = {
       const { error } = await supabase.from('tasks').delete().eq('id', id);
       if (error) throw error;
     },
+    async deleteAll(): Promise<void> {
+      const { error } = await supabase.from('tasks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+    },
   },
 
   // Templates
@@ -324,6 +392,7 @@ export const db = {
         subject: template.subject,
         content: template.content,
         variables: template.variables,
+        attachments: template.attachments || [],
       }).select().single();
       if (error) throw error;
       return transformTemplate(data);
@@ -335,6 +404,7 @@ export const db = {
       if (updates.subject !== undefined) updateData.subject = updates.subject;
       if (updates.content !== undefined) updateData.content = updates.content;
       if (updates.variables !== undefined) updateData.variables = updates.variables;
+      if (updates.attachments !== undefined) updateData.attachments = updates.attachments;
 
       const { data, error } = await supabase.from('broadcast_templates').update(updateData).eq('id', id).select().single();
       if (error) throw error;
@@ -378,6 +448,18 @@ export const db = {
       if (error) throw error;
       return transformCampaign(data);
     },
+    async delete(id: string): Promise<void> {
+      const { error } = await supabase.from('broadcast_campaigns').delete().eq('id', id);
+      if (error) throw error;
+    },
+    async deleteAll(type?: 'email' | 'whatsapp'): Promise<void> {
+      let query = supabase.from('broadcast_campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (type) {
+        query = query.eq('type', type);
+      }
+      const { error } = await query;
+      if (error) throw error;
+    },
   },
 
   // Communication Logs
@@ -403,6 +485,23 @@ export const db = {
       }).select().single();
       if (error) throw error;
       return transformCommunicationLog(data);
+    },
+    async update(id: string, updates: Partial<CommunicationLog>): Promise<CommunicationLog> {
+      const { data, error } = await supabase.from('communication_logs').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return transformCommunicationLog(data);
+    },
+    async delete(id: string): Promise<void> {
+      const { error } = await supabase.from('communication_logs').delete().eq('id', id);
+      if (error) throw error;
+    },
+    async deleteAll(type?: 'email' | 'whatsapp'): Promise<void> {
+      let query = supabase.from('communication_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (type) {
+        query = query.eq('type', type);
+      }
+      const { error } = await query;
+      if (error) throw error;
     },
   },
 
@@ -432,6 +531,44 @@ export const db = {
       const { error } = await supabase.from('notifications').update({ read: true }).eq('user_id', userId);
       if (error) throw error;
     },
+    async delete(id: string): Promise<void> {
+      const { error } = await supabase.from('notifications').delete().eq('id', id);
+      if (error) throw error;
+    },
+    async deleteAll(userId: string): Promise<void> {
+      const { error } = await supabase.from('notifications').delete().eq('user_id', userId);
+      if (error) throw error;
+    },
+  },
+
+  // Pipeline Stages
+  pipelineStages: {
+    async getAll(): Promise<PipelineStageConfig[]> {
+      const { data, error } = await supabase
+        .from('pipeline_stages')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (error) {
+        console.error('Failed to fetch pipeline stages:', error);
+        throw error;
+      }
+      return data || [];
+    },
+    async create(stage: Omit<PipelineStageConfig, 'created_at'>): Promise<PipelineStageConfig> {
+      const { data, error } = await supabase.from('pipeline_stages').insert(stage).select().single();
+      if (error) throw error;
+      return data;
+    },
+    async update(id: string, updates: Partial<PipelineStageConfig>): Promise<PipelineStageConfig> {
+      const { data, error } = await supabase.from('pipeline_stages').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    async delete(id: string): Promise<void> {
+      const { error } = await supabase.from('pipeline_stages').delete().eq('id', id);
+      if (error) throw error;
+    }
   },
 
   // Real-time subscriptions
@@ -452,6 +589,12 @@ export const db = {
       return supabase
         .channel('campaigns-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'broadcast_campaigns' }, callback)
+        .subscribe();
+    },
+    subscribeToCommunicationLogs(callback: (payload: any) => void) {
+      return supabase
+        .channel('communication-logs-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'communication_logs' }, callback)
         .subscribe();
     },
     subscribeToNotifications(userId: string, callback: (payload: any) => void) {

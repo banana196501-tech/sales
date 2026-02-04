@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Lead, PIPELINE_STAGES, PipelineStage } from '@/types/sales';
+import { Lead, PipelineStage } from '@/types/sales';
 import {
   GripVertical,
   MoreVertical,
@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 const PipelinePage: React.FC = () => {
   const { t } = useTranslation();
-  const { leads, moveLead, leadsLoading } = useSales();
+  const { leads, moveLead, leadsLoading, pipelineStages } = useSales();
   const { users } = useAuth();
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
   const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(null);
@@ -104,14 +104,14 @@ const PipelinePage: React.FC = () => {
 
       {/* Pipeline Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-        {PIPELINE_STAGES.map((stage) => (
-          <div key={stage.key} className="bg-white rounded-xl p-3 border border-slate-100">
+        {pipelineStages.map((stage) => (
+          <div key={stage.id} className="bg-white rounded-xl p-3 border border-slate-100">
             <div className="flex items-center gap-2 mb-1">
               <div className={`w-3 h-3 rounded-full ${stage.color}`} />
               <span className="text-xs font-medium text-slate-500 truncate">{stage.label}</span>
             </div>
-            <p className="text-lg font-bold text-slate-900">${(getTotalValue(stage.key) / 1000).toFixed(0)}K</p>
-            <p className="text-xs text-slate-400">{getLeadsByStage(stage.key).length} {t('deals_count')}</p>
+            <p className="text-lg font-bold text-slate-900">Rp {(getTotalValue(stage.id) / 1000).toFixed(0)}K</p>
+            <p className="text-xs text-slate-400">{getLeadsByStage(stage.id).length} {t('deals_count')}</p>
           </div>
         ))}
       </div>
@@ -119,20 +119,20 @@ const PipelinePage: React.FC = () => {
       {/* Kanban Board */}
       <div className="flex-1 overflow-x-auto pb-4">
         <div className="flex gap-4 min-w-max h-full">
-          {PIPELINE_STAGES.map((stage) => {
-            const stageLeads = getLeadsByStage(stage.key);
-            const isDropTarget = dragOverStage === stage.key;
+          {pipelineStages.map((stage) => {
+            const stageLeads = getLeadsByStage(stage.id);
+            const isDropTarget = dragOverStage === stage.id;
 
             return (
               <div
-                key={stage.key}
+                key={stage.id}
                 className={`
                   w-72 flex-shrink-0 flex flex-col bg-slate-50 rounded-2xl transition-all
                   ${isDropTarget ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}
                 `}
-                onDragOver={(e) => handleDragOver(e, stage.key)}
+                onDragOver={(e) => handleDragOver(e, stage.id)}
                 onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, stage.key)}
+                onDrop={(e) => handleDrop(e, stage.id)}
               >
                 {/* Column Header */}
                 <div className="p-4 border-b border-slate-200">
@@ -147,7 +147,7 @@ const PipelinePage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1 mt-2 text-sm text-slate-500">
                     <DollarSign className="w-4 h-4" />
-                    <span className="font-medium">${getTotalValue(stage.key).toLocaleString()}</span>
+                    <span className="font-medium">Rp {getTotalValue(stage.id).toLocaleString('id-ID')}</span>
                   </div>
                 </div>
 
@@ -192,10 +192,12 @@ const PipelinePage: React.FC = () => {
                         {/* Deal Value */}
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-lg font-bold text-slate-900">
-                            ${lead.dealValue.toLocaleString()}
+                            Rp {lead.dealValue.toLocaleString('id-ID')}
                           </span>
                           <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-lg">
-                            {lead.productInterest?.split(' ')[0] || 'N/A'}
+                            {lead.productInterest && lead.productInterest.length > 0
+                              ? lead.productInterest[0].split(' ')[0]
+                              : 'N/A'}
                           </span>
                         </div>
 

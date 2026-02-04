@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useSales } from '@/contexts/SalesContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { PIPELINE_STAGES } from '@/types/sales';
+
 import {
   BarChart3,
   TrendingUp,
@@ -31,7 +31,7 @@ import {
 
 const AnalyticsPage: React.FC = () => {
   const { t } = useTranslation();
-  const { leads, campaigns, leadsLoading } = useSales();
+  const { leads, campaigns, leadsLoading, pipelineStages, products } = useSales();
   const { users } = useAuth();
   const [dateRange, setDateRange] = useState('year');
 
@@ -52,13 +52,13 @@ const AnalyticsPage: React.FC = () => {
 
   // Pipeline data
   const pipelineData = useMemo(() => {
-    return PIPELINE_STAGES.map(stage => ({
-      stage: stage.key,
+    return pipelineStages.map(stage => ({
+      stage: stage.id,
       label: stage.label,
-      count: leads.filter(l => l.status === stage.key).length,
-      value: leads.filter(l => l.status === stage.key).reduce((sum, l) => sum + l.dealValue, 0),
+      count: leads.filter(l => l.status === stage.id).length,
+      value: leads.filter(l => l.status === stage.id).reduce((sum, l) => sum + l.dealValue, 0),
     }));
-  }, [leads]);
+  }, [leads, pipelineStages]);
 
   // Sales performance
   const salesPerformance = useMemo(() => {
@@ -87,8 +87,8 @@ const AnalyticsPage: React.FC = () => {
       });
       return {
         month,
-        revenue: monthLeads.reduce((sum, l) => sum + l.dealValue, 0) || Math.floor(Math.random() * 200000) + 100000,
-        deals: monthLeads.length || Math.floor(Math.random() * 8) + 2,
+        revenue: monthLeads.reduce((sum, l) => sum + l.dealValue, 0),
+        deals: monthLeads.length,
       };
     });
   }, [leads]);
@@ -96,28 +96,29 @@ const AnalyticsPage: React.FC = () => {
   const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#22c55e', '#ef4444'];
 
   // Product performance data
+  // Product performance data
   const productData = useMemo(() => {
-    const products = ['Enterprise CRM', 'Analytics Suite', 'Marketing Automation', 'Sales Intelligence', 'Customer Support Platform'];
     return products.map(product => {
-      const productLeads = leads.filter(l => l.productInterest === product);
+      const productLeads = leads.filter(l => Array.isArray(l.productInterest) ? l.productInterest.includes(product.name) : l.productInterest === product.name);
       const closedWon = productLeads.filter(l => l.status === 'closed_won');
       return {
-        name: product,
+        name: product.name,
         leads: productLeads.length,
         revenue: closedWon.reduce((sum, l) => sum + l.dealValue, 0),
         conversion: productLeads.length > 0 ? Math.round((closedWon.length / productLeads.length) * 100) : 0,
       };
     }).sort((a, b) => b.revenue - a.revenue);
-  }, [leads]);
+  }, [leads, products]);
 
   // Lead source data
   const sourceData = useMemo(() => {
-    const sources = ['Website', 'LinkedIn', 'Referral', 'Trade Show', 'Cold Call'];
+    const sources = Array.from(new Set(leads.map(l => l.source).filter(Boolean)));
+    if (sources.length === 0) return [];
     const total = leads.length || 1;
     return sources.map(source => ({
       name: source,
-      value: Math.round((leads.filter(l => l.source === source).length / total) * 100) || Math.floor(Math.random() * 20) + 5,
-    }));
+      value: Math.round((leads.filter(l => l.source === source).length / total) * 100),
+    })).sort((a, b) => b.value - a.value);
   }, [leads]);
 
   // Conversion funnel data
@@ -203,7 +204,7 @@ const AnalyticsPage: React.FC = () => {
               +18%
             </span>
           </div>
-          <p className="text-3xl font-bold">${(stats.revenue / 1000).toFixed(0)}K</p>
+          <p className="text-3xl font-bold">Rp {(stats.revenue / 1000000).toFixed(1)}M</p>
           <p className="text-white/80 text-sm mt-1">{t('total_revenue')}</p>
         </div>
 
@@ -271,9 +272,9 @@ const AnalyticsPage: React.FC = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 12 }} />
-                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `$${v / 1000}K`} />
+                <YAxis tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `Rp ${v / 1000000}M`} />
                 <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                  formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Revenue']}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} fill="url(#colorRev)" />
@@ -397,7 +398,7 @@ const AnalyticsPage: React.FC = () => {
                   <p className="text-xs text-slate-500">{product.leads} {t('leads_found')}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-slate-900 text-sm">${(product.revenue / 1000).toFixed(0)}K</p>
+                  <p className="font-semibold text-slate-900 text-sm">Rp {(product.revenue / 1000000).toFixed(1)}M</p>
                   <p className="text-xs text-emerald-600">{product.conversion}% conv.</p>
                 </div>
               </div>
@@ -455,7 +456,7 @@ const AnalyticsPage: React.FC = () => {
                   <td className="py-4 text-slate-600">{person.leadsAssigned}</td>
                   <td className="py-4 text-slate-600">{person.dealsClosed}</td>
                   <td className="py-4">
-                    <span className="font-semibold text-slate-900">${person.revenue.toLocaleString()}</span>
+                    <span className="font-semibold text-slate-900">Rp {person.revenue.toLocaleString('id-ID')}</span>
                   </td>
                   <td className="py-4">
                     <div className="flex items-center gap-2">

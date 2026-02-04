@@ -4,6 +4,7 @@ import { useAppContext } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SalesProvider } from '@/contexts/SalesContext';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 // Components
 import LoginPage from '@/components/auth/LoginPage';
@@ -18,36 +19,19 @@ import TasksPage from '@/components/tasks/TasksPage';
 import AnalyticsPage from '@/components/analytics/AnalyticsPage';
 import SettingsPage from '@/components/settings/SettingsPage';
 
-const PageContent: React.FC<{ currentPage: string }> = ({ currentPage }) => {
-  switch (currentPage) {
-    case 'dashboard':
-      return <Dashboard />;
-    case 'leads':
-      return <LeadsPage />;
-    case 'pipeline':
-      return <PipelinePage />;
-    case 'whatsapp':
-      return <WhatsAppPage />;
-    case 'email':
-      return <EmailPage />;
-    case 'tasks':
-      return <TasksPage />;
-    case 'analytics':
-      return <AnalyticsPage />;
-    case 'settings':
-      return <SettingsPage />;
-    default:
-      return <Dashboard />;
-  }
-};
+
 
 const MainApp: React.FC = () => {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading } = useAuth();
   const { sidebarOpen, toggleSidebar } = useAppContext();
   const isMobile = useIsMobile();
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+
+  // Get current path for header title
+  const currentPath = location.pathname.split('/')[1] || 'dashboard';
 
   // Show loading state
   if (isLoading) {
@@ -61,38 +45,31 @@ const MainApp: React.FC = () => {
     );
   }
 
-  // Show login page if not authenticated
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <LoginPage />;
   }
 
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page);
-    if (isMobile) {
-      setSidebarExpanded(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-slate-100 flex">
+    <div className="h-screen bg-slate-50 flex overflow-hidden">
       {/* Sidebar */}
       <Sidebar
-        currentPage={currentPage}
-        onNavigate={handleNavigate}
+        currentPage={currentPath}
+        onNavigate={(page) => navigate(`/${page}`)}
         isOpen={isMobile ? sidebarOpen : sidebarExpanded}
         onToggle={() => isMobile ? toggleSidebar() : setSidebarExpanded(!sidebarExpanded)}
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <Header
-          title={t(currentPage)}
+          title={t(currentPath)}
           onMenuClick={toggleSidebar}
         />
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
-          <PageContent currentPage={currentPage} />
+          <Outlet />
         </main>
       </div>
     </div>

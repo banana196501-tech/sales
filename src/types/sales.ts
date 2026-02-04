@@ -2,12 +2,20 @@
 
 export type UserRole = 'admin' | 'manager' | 'sales';
 
+export interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+}
+
 export interface User {
   id: string;
   email: string;
   name: string;
   role: UserRole;
   avatar?: string;
+  password?: string;
   createdAt: string;
 }
 
@@ -17,7 +25,7 @@ export interface Lead {
   company: string;
   phone: string;
   email: string;
-  productInterest: string;
+  productInterest: string[];
   dealValue: number;
   status: PipelineStage;
   tags: string[];
@@ -28,22 +36,17 @@ export interface Lead {
   updatedAt: string;
 }
 
-export type PipelineStage = 
-  | 'new_lead'
-  | 'contacted'
-  | 'presentation'
-  | 'negotiation'
-  | 'closed_won'
-  | 'closed_lost';
+export type PipelineStage = string;
 
-export const PIPELINE_STAGES: { key: PipelineStage; label: string; color: string }[] = [
-  { key: 'new_lead', label: 'New Lead', color: 'bg-slate-500' },
-  { key: 'contacted', label: 'Contacted', color: 'bg-blue-500' },
-  { key: 'presentation', label: 'Presentation', color: 'bg-purple-500' },
-  { key: 'negotiation', label: 'Negotiation', color: 'bg-amber-500' },
-  { key: 'closed_won', label: 'Closed Won', color: 'bg-emerald-500' },
-  { key: 'closed_lost', label: 'Closed Lost', color: 'bg-red-500' },
-];
+export interface PipelineStageConfig {
+  id: string;
+  label: string;
+  color: string;
+  order_index: number;
+  is_system: boolean;
+  active?: boolean;
+}
+
 
 export interface Task {
   id: string;
@@ -75,6 +78,7 @@ export interface BroadcastTemplate {
   subject?: string;
   content: string;
   variables: string[];
+  attachments?: string[];
   createdAt: string;
   updatedAt: string;
 }
